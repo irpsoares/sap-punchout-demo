@@ -117,6 +117,21 @@
   .section-title h2{ margin:0; font-size:18px; }
   .section-title small{ color:var(--muted); }
 
+  /* FIX: inputs do PunchOut com texto preto (evita ficar branco/invisível) */
+  #catalog .popup input[type="number"],
+  #catalog .popup input[type="text"],
+  #catalog .popup select{
+  background:#fff;
+  color:#111827;
+  border:1px solid #e5e7eb;
+  }
+
+/* também corrige placeholder, se ele estiver claro demais */
+#catalog .popup input::placeholder{
+  color:#6b7280;
+}
+
+
   /* Tiles */
   .tiles{
     display:grid;
