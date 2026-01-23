@@ -3,203 +3,250 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SAP Fiori – Ciclo de Compras Executivo</title>
+<title>SAP Fiori – Cockpit Executivo de Compras (Demo)</title>
 
 <style>
   :root{
-    --bg:#f4f6f8;
-    --header:#354a5f;
+    --bg:#f5f7fb;
+    --header1:#1f2a37;
+    --header2:#354a5f;
     --primary:#0a6ed1;
-    --primaryHover:#0854b0;
-    --text:#1a1a1a;
-    --muted:#666;
-    --card:#fff;
-    --line:#e0e3e7;
-    --shadow:0 4px 12px rgba(0,0,0,.10);
-    --shadowStrong:0 10px 40px rgba(0,0,0,.30);
-    --radius:12px;
+    --primary2:#4f8cff;
+
+    --card:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+
+    --shadow: 0 10px 30px rgba(17,24,39,.10);
+    --shadow2: 0 18px 50px rgba(17,24,39,.16);
+    --radius: 16px;
+
+    --goodBg:#d1fae5; --goodFg:#065f46;
+    --warnBg:#fef3c7; --warnFg:#92400e;
+    --badBg:#fde2e2;  --badFg:#8a1c1c;
+    --infoBg:#dbeafe; --infoFg:#1e40af;
   }
 
+  *{ box-sizing:border-box; }
+
   body{
-    font-family: Arial, sans-serif;
-    background:var(--bg);
     margin:0;
+    font-family:"Segoe UI", Inter, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, rgba(79,140,255,.18), transparent 60%),
+      radial-gradient(900px 500px at 85% 0%, rgba(10,110,209,.14), transparent 55%),
+      var(--bg);
     color:var(--text);
   }
 
   .hidden{ display:none !important; }
 
   header{
-    background:var(--header);
+    background: linear-gradient(90deg, var(--header1), var(--header2));
     color:#fff;
-    padding:15px 20px;
-    text-align:center;
-    box-shadow:0 2px 10px rgba(0,0,0,.10);
+    padding:16px 18px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.20);
+    position:sticky;
+    top:0;
+    z-index:50;
   }
-  header h1{ margin:0; font-size:20px; }
-  header p{ margin:6px 0 0; opacity:.95; }
 
-  .container{
-    padding:25px;
+  .header-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
     max-width:1200px;
     margin:0 auto;
   }
 
-  /* Controls */
-  .toolbar{
+  .brand h1{ margin:0; font-size:18px; letter-spacing:.2px; }
+  .brand p{ margin:4px 0 0; opacity:.95; font-size:12px; }
+
+  .header-actions{
     display:flex;
     align-items:center;
-    flex-wrap:wrap;
     gap:10px;
-    margin-bottom:20px;
+    flex-wrap:wrap;
   }
 
-  input, button{
-    padding:10px 15px;
-    border:none;
-    border-radius:10px;
+  select, input, button{
     font-size:14px;
+    border-radius:12px;
+    padding:10px 12px;
+    border:1px solid rgba(255,255,255,.20);
+    outline:none;
   }
 
-  input{
-    border:1px solid #ddd;
-    flex:1;
-    min-width:240px;
-    max-width:380px;
-    background:#fff;
+  select, input{
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    backdrop-filter: blur(6px);
   }
+  select option{ color:#111; }
+
+  input::placeholder{ color: rgba(255,255,255,.75); }
 
   button{
-    background:var(--primary);
-    color:#fff;
+    border:none;
     cursor:pointer;
-    transition:background .2s, transform .05s;
+    color:#fff;
+    background: linear-gradient(90deg, var(--primary), var(--primary2));
+    box-shadow: 0 10px 20px rgba(10,110,209,.18);
+    transition: transform .06s ease, filter .18s ease;
   }
-  button:hover{ background:var(--primaryHover); }
+  button:hover{ filter: brightness(.98); }
   button:active{ transform: translateY(1px); }
 
-  button.gray{ background:#6a6d70; }
-  button.gray:hover{ background:#555; }
+  button.gray{ background:#6a6d70; box-shadow:none; }
+  button.green{ background: linear-gradient(90deg, #1f9d55, #2ecc71); box-shadow:0 10px 20px rgba(46,204,113,.18); }
+  button.red{ background: linear-gradient(90deg, #c62828, #ef5350); box-shadow:0 10px 20px rgba(239,83,80,.18); }
 
-  button.green{ background:#28a745; }
-  button.green:hover{ background:#218838; }
+  .container{ max-width:1200px; margin:0 auto; padding:22px; }
+
+  .section-title{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:6px 0 10px;
+  }
+  .section-title h2{ margin:0; font-size:18px; }
+  .section-title small{ color:var(--muted); }
 
   /* Tiles */
   .tiles{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
-    gap:20px;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
   }
 
   .tile{
-    background:var(--card);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:20px;
+    background: linear-gradient(180deg, #fff, #fbfcff);
+    border:1px solid rgba(229,231,235,.95);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding:18px;
     cursor:pointer;
-    transition:transform .2s, box-shadow .2s;
     position:relative;
     overflow:hidden;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    min-height:128px;
   }
+
   .tile:hover{
-    transform:translateY(-5px);
-    box-shadow:0 8px 18px rgba(0,0,0,.14);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow2);
+    border-color: rgba(10,110,209,.22);
   }
+
   .tile::before{
     content:"";
     position:absolute;
-    left:0; top:0; bottom:0;
-    width:6px;
-    background:var(--primary);
-    opacity:.95;
+    inset:0;
+    background: radial-gradient(650px 220px at 0% 0%, rgba(10,110,209,.12), transparent 55%);
+    pointer-events:none;
   }
-  .tile h3{
-    margin:0 0 6px;
-    font-size:16px;
-    padding-left:10px;
+
+  .tile h3{ margin:0; font-size:14px; letter-spacing:.2px; }
+  .tile .sub{ margin-top:6px; color:var(--muted); font-size:12px; }
+  .tile .metric-row{ display:flex; align-items:baseline; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .tile .metric{ font-size:30px; font-weight:800; color:var(--primary); letter-spacing:.2px; }
+  .tile .mini{ font-size:12px; color:var(--muted); }
+
+  /* KPIs */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:14px;
+    margin:14px 0;
   }
-  .tile div{
-    color:var(--muted);
-    font-size:14px;
-    padding-left:10px;
+  .kpi{
+    background: linear-gradient(180deg,#fff,#fbfcff);
+    border:1px solid rgba(229,231,235,.95);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: radial-gradient(520px 160px at 0% 0%, rgba(79,140,255,.10), transparent 60%);
+    pointer-events:none;
+  }
+  .kpi .label{ color:var(--muted); font-size:12px; position:relative; }
+  .kpi .value{ font-size:26px; font-weight:800; color:var(--primary); margin-top:6px; position:relative; }
+
+  /* Cards / panels */
+  .panel{
+    background:#fff;
+    border:1px solid rgba(229,231,235,.95);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding:16px;
   }
 
   /* Tables */
   .table{
     width:100%;
     border-collapse:collapse;
-    margin-top:15px;
     background:#fff;
-    border-radius:10px;
+    border-radius: 14px;
     overflow:hidden;
-  }
-  .table th, .table td{
-    border-bottom:1px solid var(--line);
-    padding:12px;
-    text-align:left;
-  }
-  .table th{
-    background:#f0f2f5;
-    font-weight:600;
-    color:#333;
-  }
-  .table tr:hover td{ background:#f8f9fa; }
-
-  /* Status / badges */
-  .status{
-    font-weight:bold;
-    padding:4px 10px;
-    border-radius:999px;
-    display:inline-block;
-    font-size:12px;
-  }
-  .aprovadoBadge{ background:#d4edda; color:#155724; }
-  .pendenteBadge{ background:#fff3cd; color:#856404; }
-
-  /* KPI */
-  .kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
-    margin:15px 0;
-  }
-  .kpi{
-    background:#fff;
-    padding:18px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-    text-align:center;
-  }
-  .kpi b{
-    display:block;
-    font-size:22px;
-    color:var(--primary);
-    margin-top:6px;
-  }
-
-  /* Timeline */
-  .timeline{
-    background:#fff;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    box-shadow: 0 6px 18px rgba(17,24,39,.08);
     margin-top:10px;
   }
-  .timeline div{
-    padding:8px 10px;
-    margin:8px 0 0;
-    border-left:4px solid #ccc;
-    border-radius:6px;
-    background:#fbfbfb;
+  .table th, .table td{
+    padding:12px;
+    border-bottom:1px solid var(--line);
+    text-align:left;
+    vertical-align:middle;
   }
-  .timeline .done{ border-color:#2e7d32; }
-  .timeline .wait{ border-color:#ef6c00; }
+  .table th{ background:#f3f4f6; font-weight:800; color:#374151; font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+  .table tr:hover td{ background:#f8fafc; }
+
+  /* Status badges */
+  .status{
+    font-weight:800;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .good{ background:var(--goodBg); color:var(--goodFg); }
+  .warn{ background:var(--warnBg); color:var(--warnFg); }
+  .bad { background:var(--badBg);  color:var(--badFg); }
+  .info{ background:var(--infoBg); color:var(--infoFg); }
+
+  /* Timeline */
+  .timeline{ margin-top:10px; }
+  .timeline .step{
+    padding:10px 10px;
+    margin:8px 0 0;
+    border-left:4px solid #cbd5e1;
+    border-radius:10px;
+    background:#fbfbfb;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .timeline .done{ border-left-color:#2ecc71; }
+  .timeline .wait{ border-left-color:#f59e0b; }
+  .timeline .rej { border-left-color:#ef5350; }
 
   /* Modal (overlay + popup) */
   .overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.5);
+    background:rgba(0,0,0,.55);
     z-index:1000;
     display:flex;
     align-items:center;
@@ -208,13 +255,13 @@
   }
   .popup{
     position:relative;
-    width: min(900px, 96vw);
+    width: min(980px, 96vw);
     max-height: 90vh;
     overflow:auto;
     background:#fff;
     border-radius:var(--radius);
-    box-shadow:var(--shadowStrong);
-    padding:22px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+    padding:18px;
     z-index:1001;
     pointer-events:auto;
   }
@@ -224,306 +271,908 @@
     right:12px;
     font-size:18px;
     cursor:pointer;
-    color:#555;
+    color:#6b7280;
     user-select:none;
   }
-  .close-popup:hover{ color:#000; }
+  .close-popup:hover{ color:#111827; }
 
-  .fornecedor{
+  .supplier-banner{
     background:#eef3f8;
     padding:14px;
-    border-left:5px solid var(--primary);
-    border-radius:10px;
-    font-weight:600;
-    margin-bottom:14px;
+    border-left:6px solid var(--primary);
+    border-radius:12px;
+    font-weight:800;
+    margin-bottom:12px;
   }
 
+  .row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    border:1px solid rgba(229,231,235,.95);
+    background:#fff;
+    border-radius:999px;
+    padding:8px 10px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:12px;
+    color:#334155;
+  }
+  .chip.active{
+    border-color: rgba(10,110,209,.35);
+    background: rgba(10,110,209,.08);
+    color: var(--primary);
+  }
+
+  .muted{ color:var(--muted); }
+
   @media (max-width: 768px){
-    header h1{ font-size:18px; }
-    .container{ padding:18px; }
+    .container{ padding:16px; }
+    .tile .metric{ font-size:26px; }
   }
 </style>
 </head>
 
 <body>
 <header>
-  <h1>SAP Fiori Launchpad – Simulação Executiva de Compras</h1>
-  <p>Fluxo: ME51N → PunchOut → Aprovação RC → Aprovação PO → Visão Executiva</p>
+  <div class="header-row">
+    <div class="brand">
+      <h1>SAP Fiori – Cockpit Executivo (PunchOut + Aprovações)</h1>
+      <p>ME51N → PunchOut → Inbox RC/PO (multi) → KPIs → Top Fornecedores</p>
+    </div>
+
+    <div class="header-actions">
+      <label class="muted" style="color:rgba(255,255,255,.85);font-size:12px;">Atuar como</label>
+      <select id="actor" onchange="renderAll()">
+        <option value="Coordenador">Coordenador</option>
+        <option value="Gerente">Gerente</option>
+        <option value="CPO">CPO</option>
+      </select>
+
+      <input id="transacao" placeholder="ME51N / INBOX / CICLO / REL" />
+      <button onclick="executarTransacao()">Executar</button>
+      <button class="gray" onclick="resetDemo()">Reset</button>
+    </div>
+  </div>
 </header>
 
 <!-- LAUNCHPAD -->
 <div class="container" id="launchpad">
-  <div class="toolbar">
-    <input id="transacao" placeholder="Digite: ME51N / ME28N / ME23N / CICLO" />
-    <button onclick="executarTransacao()">Executar</button>
+  <div class="section-title">
+    <h2>Resumo executivo</h2>
+    <small id="asof">—</small>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Valor travado (pendente)</div>
+      <div class="value" id="kTravado">R$ 0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">SLA médio (dias)</div>
+      <div class="value" id="kSlaMedio">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">SLA pior caso (dias)</div>
+      <div class="value" id="kSlaMax">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Economia / evitado (RC aprovadas)</div>
+      <div class="value" id="kEconomia">R$ 0</div>
+    </div>
   </div>
 
   <div class="tiles">
     <div class="tile" onclick="openME51N()">
-      <h3>ME51N</h3>
-      <div>Criar Requisição</div>
+      <h3>ME51N – Criar Requisição</h3>
+      <div class="sub">Simular PunchOut e gerar RCs em fila</div>
+      <div class="metric-row">
+        <div class="metric" id="tRcsPend">0</div>
+        <div class="mini">RCs pendentes</div>
+      </div>
     </div>
-    <div class="tile" onclick="openME28N()">
-      <h3>ME28N</h3>
-      <div>Aprovar Requisição</div>
+
+    <div class="tile" onclick="openInbox()">
+      <h3>INBOX – Aprovações</h3>
+      <div class="sub">Fila por nível (Coordenador → Gerente → CPO)</div>
+      <div class="metric-row">
+        <div class="metric" id="tPendActor">0</div>
+        <span class="status warn" id="tPendActorLabel">Pendente</span>
+      </div>
     </div>
-    <div class="tile" onclick="openME23N()">
-      <h3>ME23N</h3>
-      <div>Aprovar Pedido</div>
-    </div>
+
     <div class="tile" onclick="openCiclo()">
-      <h3>Ciclo de Compra</h3>
-      <div>Visão Executiva</div>
+      <h3>Ciclo de Compra – Visão Executiva</h3>
+      <div class="sub">Pendências por nível + top fornecedores</div>
+      <div class="metric-row">
+        <div class="metric" id="tDocs">0</div>
+        <div class="mini">Documentos</div>
+      </div>
     </div>
+
+    <div class="tile" onclick="openRel()">
+      <h3>Relatórios</h3>
+      <div class="sub">Histórico (aprovado/reprovado/pendente)</div>
+      <div class="metric-row">
+        <div class="metric" id="tAprovados">0</div>
+        <span class="status good">Aprovados</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px" class="panel">
+    <div class="section-title" style="margin:0 0 6px">
+      <h2 style="font-size:14px;margin:0;">Pendências por nível (snapshot)</h2>
+      <small class="muted">RC e PO em aprovação</small>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr>
+      </thead>
+      <tbody id="pendTabelaHome"></tbody>
+    </table>
   </div>
 </div>
 
 <!-- ME51N -->
 <div class="container hidden" id="me51n">
-  <h2>ME51N – Criar Requisição</h2>
-  <button class="green" onclick="openCatalog()">Catálogo PunchOut</button>
+  <div class="section-title">
+    <h2>ME51N – Criar Requisição</h2>
+    <small class="muted">Crie várias RCs; elas entram na fila do Coordenador</small>
+  </div>
 
-  <table class="table">
-    <thead><tr><th>Material</th><th>Qtd</th><th>Valor</th><th>Fornecedor</th></tr></thead>
-    <tbody id="rcItems"></tbody>
-  </table>
+  <div class="panel">
+    <div class="row">
+      <div>
+        <div class="muted" style="font-size:12px;">Última RC gerada</div>
+        <div style="font-weight:900;font-size:18px" id="lastRc">—</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="green" onclick="openCatalog()">Catálogo PunchOut</button>
+        <button class="gray" onclick="back()">Voltar</button>
+      </div>
+    </div>
 
-  <p><b>Total:</b> R$ <span id="rcTotal">0</span></p>
-  <p>
-    Status:
-    <span id="rcStatus" class="status pendenteBadge">EM EDIÇÃO</span>
-  </p>
+    <table class="table" style="margin-top:12px">
+      <thead><tr><th>Item</th><th>Qtd</th><th>Valor</th><th>Fornecedor</th></tr></thead>
+      <tbody id="rcItems"></tbody>
+    </table>
 
-  <button class="gray" onclick="back()">Fechar</button>
-</div>
+    <div class="row" style="margin-top:10px">
+      <div><b>Total:</b> R$ <span id="rcTotal">0</span></div>
+      <div>
+        <span class="status warn" id="rcStatus">EM EDIÇÃO</span>
+      </div>
+    </div>
 
-<!-- ME28N -->
-<div class="container hidden" id="me28n">
-  <h2>ME28N – Aprovação da Requisição</h2>
-  <p><b>RC:</b> <span id="rcNum">-</span></p>
-  <p>Status: <span id="rcApStatus">-</span></p>
-  <p>Pendente com: <span id="rcPend">-</span></p>
-
-  <div class="timeline" id="rcTimeline"></div>
-
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
-    <button class="green" onclick="approveRC()">Aprovar</button>
-    <button class="gray" onclick="back()">Fechar</button>
+    <div class="row" style="margin-top:12px">
+      <div class="muted" style="font-size:12px">
+        Dica: crie 3–5 RCs e depois vá para INBOX e aprove como Coordenador → Gerente → CPO.
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ME23N -->
-<div class="container hidden" id="me23n">
-  <h2>ME23N – Aprovação do Pedido</h2>
-  <p><b>Pedido:</b> <span id="poNum">-</span></p>
-  <p>Status: <span id="poStatus">-</span></p>
-  <p>Pendente com: <span id="poPend">-</span></p>
+<!-- INBOX -->
+<div class="container hidden" id="inbox">
+  <div class="section-title">
+    <h2>INBOX – Aprovações</h2>
+    <small class="muted">Mostra apenas o que está pendente para o nível selecionado no topo</small>
+  </div>
 
-  <div class="timeline" id="poTimeline"></div>
+  <div class="panel">
+    <div class="row">
+      <div class="chips">
+        <div class="chip active" id="fAll" onclick="setInboxFilter('ALL')">Todos</div>
+        <div class="chip" id="fRC" onclick="setInboxFilter('RC')">Somente RC</div>
+        <div class="chip" id="fPO" onclick="setInboxFilter('PO')">Somente PO</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="gray" onclick="openCiclo()">Abrir Ciclo</button>
+        <button class="gray" onclick="back()">Voltar</button>
+      </div>
+    </div>
 
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
-    <button class="green" onclick="approvePO()">Aprovar</button>
-    <button class="gray" onclick="back()">Fechar</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>SLA (dias)</th>
+          <th>Status</th><th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="inboxTabela"></tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:14px" class="panel">
+    <div class="section-title" style="margin:0 0 8px">
+      <h2 style="font-size:14px;margin:0;">Detalhe do documento</h2>
+      <small class="muted">Clique em “Ver” para abrir a trilha de aprovação</small>
+    </div>
+    <div id="docDetail" class="muted">Nenhum documento selecionado.</div>
   </div>
 </div>
 
-<!-- CICLO -->
+<!-- CICLO EXECUTIVO -->
 <div class="container hidden" id="ciclo">
-  <h2>Ciclo de Compra – Visão Executiva</h2>
+  <div class="section-title">
+    <h2>Ciclo de Compra – Visão Executiva</h2>
+    <small class="muted">Pendências, SLA, valor travado, economia e top fornecedores</small>
+  </div>
 
   <div class="kpi-grid">
-    <div class="kpi">Requisições<b id="kReq">0</b></div>
-    <div class="kpi">Pedidos<b id="kPO">0</b></div>
-    <div class="kpi">Valor Total<b id="kValor">R$ 0</b></div>
-    <div class="kpi">Ticket Médio<b id="kTicket">R$ 0</b></div>
+    <div class="kpi"><div class="label">Valor travado</div><div class="value" id="kTravado2">R$ 0</div></div>
+    <div class="kpi"><div class="label">SLA médio (dias)</div><div class="value" id="kSlaMedio2">0</div></div>
+    <div class="kpi"><div class="label">SLA pior caso (dias)</div><div class="value" id="kSlaMax2">0</div></div>
+    <div class="kpi"><div class="label">Economia/evitado</div><div class="value" id="kEconomia2">R$ 0</div></div>
   </div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>RC</th><th>PO</th><th>Fornecedor</th>
-        <th>Valor</th><th>Status</th><th>Pendente</th>
-      </tr>
-    </thead>
-    <tbody id="cicloTabela"></tbody>
-  </table>
+  <div class="panel">
+    <div class="section-title" style="margin:0 0 8px">
+      <h2 style="font-size:14px;margin:0;">Pendências por nível</h2>
+      <small class="muted">Separado por RC e PO</small>
+    </div>
+    <table class="table">
+      <thead><tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr></thead>
+      <tbody id="pendTabela"></tbody>
+    </table>
+  </div>
 
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
-    <button onclick="exportarPPT()" class="gray">Exportar PowerPoint</button>
-    <button class="gray" onclick="back()">Fechar</button>
+  <div style="margin-top:14px" class="panel">
+    <div class="section-title" style="margin:0 0 8px">
+      <h2 style="font-size:14px;margin:0;">Top fornecedores</h2>
+      <small class="muted">Ranking por valor total de documentos</small>
+    </div>
+    <table class="table">
+      <thead><tr><th>Fornecedor</th><th>Valor total</th><th>Documentos</th></tr></thead>
+      <tbody id="fornTabela"></tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:14px" class="panel">
+    <div class="section-title" style="margin:0 0 8px">
+      <h2 style="font-size:14px;margin:0;">Documentos recentes</h2>
+      <small class="muted">RC e PO (pendente/aprovado/reprovado)</small>
+    </div>
+    <table class="table">
+      <thead><tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível atual</th><th>Datas</th></tr></thead>
+      <tbody id="docsTabela"></tbody>
+    </table>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+      <button class="gray" onclick="openRel()">Abrir Relatórios</button>
+      <button class="gray" onclick="back()">Voltar</button>
+    </div>
   </div>
 </div>
 
-<!-- PUNCHOUT (Overlay + Popup) -->
+<!-- RELATÓRIOS -->
+<div class="container hidden" id="rel">
+  <div class="section-title">
+    <h2>Relatórios</h2>
+    <small class="muted">Exportação CSV (simples) + histórico completo</small>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <div class="muted">Total documentos: <b id="rTotal">0</b> | Aprovados: <b id="rAprov">0</b> | Reprovados: <b id="rReprov">0</b> | Pendentes: <b id="rPend">0</b></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="gray" onclick="exportCSV()">Exportar CSV</button>
+        <button class="gray" onclick="back()">Voltar</button>
+      </div>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível</th><th>Criado em</th><th>Finalizado em</th></tr>
+      </thead>
+      <tbody id="relTabela"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PUNCHOUT MODAL -->
 <div class="overlay hidden" id="catalog" onclick="closeCatalog()">
   <div class="popup" onclick="event.stopPropagation()">
     <span class="close-popup" onclick="closeCatalog()">✖</span>
 
-    <div class="fornecedor">Fornecedor: GRUPO IGOR SOARES</div>
+    <div class="supplier-banner" id="supplierBanner">Fornecedor: —</div>
 
-    <h3>Catálogo PunchOut</h3>
+    <div class="section-title" style="margin:0 0 8px">
+      <h2 style="font-size:16px;margin:0;">Catálogo PunchOut</h2>
+      <small class="muted">Selecione itens e envie ao SAP (gera RC)</small>
+    </div>
+
     <table class="table">
-      <thead><tr><th>Item</th><th>Descrição</th><th>Valor</th><th>Qtd</th></tr></thead>
-      <tbody>
-        <tr><td>A4</td><td>Papel A4</td><td>30</td><td><input id="q1" type="number" min="0" value="0" style="width:90px;border:1px solid #ddd;border-radius:10px;padding:8px"/></td></tr>
-        <tr><td>CAN</td><td>Caneta Azul</td><td>5</td><td><input id="q2" type="number" min="0" value="0" style="width:90px;border:1px solid #ddd;border-radius:10px;padding:8px"/></td></tr>
-      </tbody>
+      <thead><tr><th>Item</th><th>Descrição</th><th>Valor (R$)</th><th>Qtd</th></tr></thead>
+      <tbody id="punchTable"></tbody>
     </table>
 
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
-      <button class="green" onclick="sendSAP()">Enviar</button>
-      <button class="gray" onclick="closeCatalog()">Cancelar</button>
+    <div class="row" style="margin-top:12px">
+      <div class="muted">Economia/evitado: <b id="ecoHint">—</b> (simulação)</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="green" onclick="sendSAP()">Enviar</button>
+        <button class="gray" onclick="closeCatalog()">Cancelar</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+  // ====== Config ======
   const aprovadores = ["Coordenador","Gerente","CPO"];
-  let rc = null, po = null;
-  let rcStep = 0, poStep = 0;
-  let historico = [];
+  const fornecedoresDemo = ["Grupo Igor Soares","OfficeMax BR","Papelaria Central","Suprimentos Alfa","Industrial Parts Ltda"];
+  const itensCatalogo = [
+    { sku:"A4", desc:"Papel A4 (resma)", preco:30 },
+    { sku:"CAN", desc:"Caneta Azul", preco:5 },
+    { sku:"TON", desc:"Toner Impressora", preco:420 },
+    { sku:"LUV", desc:"Luva EPI", preco:18 },
+    { sku:"CAB", desc:"Cabo Elétrico 2,5mm", preco:12 }
+  ];
 
+  // ====== State (fila real) ======
+  // doc = { type:'RC'|'PO', id, fornecedor, valor, economia, status, stepIndex, createdAt, finalizedAt, finalizedBy, parentRcId?, approvals:[{by,action,at}] }
+  let docs = [];
+  let inboxFilter = "ALL";
+  let lastCreatedDoc = null;
+
+  const LS_KEY = "demo_exec_cockpit_docs_v1";
+
+  // ====== Helpers ======
   const $ = (id) => document.getElementById(id);
 
+  function nowMs(){ return Date.now(); }
+
+  function formatDate(ms){
+    if(!ms) return "—";
+    try{
+      return new Date(ms).toLocaleString("pt-BR");
+    }catch(e){
+      return "—";
+    }
+  }
+
+  function daysBetweenMs(startMs, endMs){
+    const ms = Math.max(0, (endMs||nowMs()) - (startMs||nowMs()));
+    return Math.ceil(ms / (1000*60*60*24));
+  }
+
+  function money(n){
+    return (Number(n||0)).toLocaleString("pt-BR");
+  }
+
+  function statusToBadgeClass(status){
+    if(status === "APROVADA" || status === "APROVADO") return "status good";
+    if(status === "REPROVADA" || status === "REPROVADO") return "status bad";
+    if(status === "EM APROVAÇÃO") return "status warn";
+    return "status info";
+  }
+
+  function currentActor(){
+    return $("actor").value;
+  }
+
   function hideAll(){
-    document.querySelectorAll(".container").forEach(d => d.classList.add("hidden"));
+    ["launchpad","me51n","inbox","ciclo","rel"].forEach(id => $(id).classList.add("hidden"));
   }
 
   function back(){
     hideAll();
     $("launchpad").classList.remove("hidden");
+    renderAll();
   }
 
-  function openME51N(){ hideAll(); $("me51n").classList.remove("hidden"); }
-  function openME28N(){ hideAll(); $("me28n").classList.remove("hidden"); updateME28N(); }
-  function openME23N(){ hideAll(); $("me23n").classList.remove("hidden"); updateME23N(); }
-  function openCiclo(){ hideAll(); $("ciclo").classList.remove("hidden"); updateCiclo(); }
+  function openME51N(){ hideAll(); $("me51n").classList.remove("hidden"); renderME51N(); }
+  function openInbox(){ hideAll(); $("inbox").classList.remove("hidden"); renderInbox(); }
+  function openCiclo(){ hideAll(); $("ciclo").classList.remove("hidden"); renderCiclo(); }
+  function openRel(){ hideAll(); $("rel").classList.remove("hidden"); renderRel(); }
 
   function executarTransacao(){
     const t = ($("transacao").value || "").trim().toUpperCase();
-    if (t === "ME51N") openME51N();
-    else if (t === "ME28N") openME28N();
-    else if (t === "ME23N") openME23N();
-    else if (t === "CICLO" || t === "CATALOGO") openCiclo();
+    if(t === "ME51N") openME51N();
+    else if(t === "INBOX") openInbox();
+    else if(t === "CICLO" || t === "CATALOGO") openCiclo();
+    else if(t === "REL" || t === "RELATORIO" || t === "RELATÓRIO") openRel();
+    else back();
   }
 
-  function openCatalog(){ $("catalog").classList.remove("hidden"); }
-  function closeCatalog(){ $("catalog").classList.add("hidden"); }
+  function setInboxFilter(f){
+    inboxFilter = f;
+    ["fAll","fRC","fPO"].forEach(id => $(id).classList.remove("active"));
+    if(f === "ALL") $("fAll").classList.add("active");
+    if(f === "RC") $("fRC").classList.add("active");
+    if(f === "PO") $("fPO").classList.add("active");
+    renderInbox();
+  }
+
+  // ====== Persistence ======
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify(docs));
+  }
+
+  function load(){
+    try{
+      docs = JSON.parse(localStorage.getItem(LS_KEY)) || [];
+    }catch(e){
+      docs = [];
+    }
+  }
+
+  function resetDemo(){
+    if(!confirm("Resetar a demo e apagar o histórico local?")) return;
+    docs = [];
+    lastCreatedDoc = null;
+    save();
+    renderAll();
+    back();
+  }
+
+  // ====== PunchOut ======
+  let currentSupplier = null;
+
+  function openCatalog(){
+    currentSupplier = fornecedoresDemo[Math.floor(Math.random()*fornecedoresDemo.length)];
+    $("supplierBanner").innerText = "Fornecedor: " + currentSupplier;
+
+    $("punchTable").innerHTML = itensCatalogo.map((it, idx) => `
+      <tr>
+        <td>${it.sku}</td>
+        <td>${it.desc}</td>
+        <td>${money(it.preco)}</td>
+        <td>
+          <input id="q_${idx}" type="number" min="0" value="0"
+            style="width:100px;border:1px solid #e5e7eb;border-radius:12px;padding:10px" />
+        </td>
+      </tr>
+    `).join("");
+
+    $("ecoHint").innerText = "—";
+    $("catalog").classList.remove("hidden");
+  }
+
+  function closeCatalog(){
+    $("catalog").classList.add("hidden");
+  }
 
   function sendSAP(){
-    const q1 = Number(($("q1").value || 0));
-    const q2 = Number(($("q2").value || 0));
+    // monta itens
+    let total = 0;
+    let linhas = "";
 
-    let total = 0, html = "";
+    itensCatalogo.forEach((it, idx) => {
+      const qtd = Number(($("q_"+idx).value || 0));
+      if(qtd > 0){
+        const val = qtd * it.preco;
+        total += val;
+        linhas += `<tr><td>${it.desc}</td><td>${qtd}</td><td>R$ ${money(val)}</td><td>${currentSupplier}</td></tr>`;
+      }
+    });
 
-    if (q1 > 0){
-      total += q1 * 30;
-      html += `<tr><td>Papel A4</td><td>${q1}</td><td>R$ ${(q1*30)}</td><td>Grupo Igor Soares</td></tr>`;
-    }
-    if (q2 > 0){
-      total += q2 * 5;
-      html += `<tr><td>Caneta Azul</td><td>${q2}</td><td>R$ ${(q2*5)}</td><td>Grupo Igor Soares</td></tr>`;
-    }
-
-    if (total <= 0){
+    if(total <= 0){
       alert("Selecione pelo menos 1 item.");
       return;
     }
 
-    rc = { num:"RC"+Date.now().toString().slice(-6), valor: total, status: "EM APROVAÇÃO" };
-    rcStep = 0;
+    // economia simulada: 4% do total (evitado)
+    const economia = Math.round(total * 0.04);
+    $("ecoHint").innerText = "R$ " + money(economia);
 
-    $("rcItems").innerHTML = html;
-    $("rcTotal").innerText = total;
-    $("rcStatus").innerText = "AGUARDANDO " + aprovadores[rcStep];
+    const rcId = "RC" + nowMs().toString().slice(-7);
 
-    $("rcNum").innerText = rc.num;
+    const rcDoc = {
+      type: "RC",
+      id: rcId,
+      fornecedor: currentSupplier,
+      valor: total,
+      economia: economia,
+      status: "EM APROVAÇÃO",
+      stepIndex: 0,
+      createdAt: nowMs(),
+      finalizedAt: null,
+      finalizedBy: null,
+      parentRcId: null,
+      approvals: []
+    };
 
+    docs.unshift(rcDoc); // coloca mais novo primeiro
+    lastCreatedDoc = rcDoc;
+
+    // atualiza ME51N preview
+    $("rcItems").innerHTML = linhas;
+    $("rcTotal").innerText = money(total);
+    $("rcStatus").className = statusToBadgeClass("EM APROVAÇÃO");
+    $("rcStatus").innerText = "AGUARDANDO " + aprovadores[0];
+    $("lastRc").innerText = rcId;
+
+    save();
     closeCatalog();
+    renderAll();
   }
 
-  function approveRC(){
-    if (!rc){
-      alert("Nenhuma requisição criada ainda (volte na ME51N e envie do PunchOut).");
+  // ====== Approval engine (multi fila) ======
+  function pendingForActor(actor){
+    const idx = aprovadores.indexOf(actor);
+    return docs.filter(d => d.status === "EM APROVAÇÃO" && d.stepIndex === idx);
+  }
+
+  function approveDoc(docId){
+    const actor = currentActor();
+    const idx = docs.findIndex(d => d.id === docId);
+    if(idx < 0) return;
+
+    const d = docs[idx];
+    if(d.status !== "EM APROVAÇÃO"){
+      alert("Documento já finalizado.");
+      return;
+    }
+    if(aprovadores[d.stepIndex] !== actor){
+      alert("Este documento não está pendente para o seu nível.");
       return;
     }
 
-    if (rcStep < aprovadores.length - 1){
-      rcStep++;
-      $("rcStatus").innerText = "AGUARDANDO " + aprovadores[rcStep];
-    } else {
-      rc.status = "APROVADA";
-      po = { num:"PO"+Date.now().toString().slice(-6), valor: rc.valor, status: "EM APROVAÇÃO" };
-      poStep = 0;
+    d.approvals.push({ by: actor, action: "APROVADO", at: nowMs() });
 
-      historico.push({ rc, po });
-
-      rc = null;
-      $("rcStatus").innerText = "APROVADA";
-    }
-
-    updateME28N();
-  }
-
-  function approvePO(){
-    if (!po){
-      alert("Nenhum pedido em aprovação (aprove a RC primeiro).");
+    if(d.stepIndex < aprovadores.length - 1){
+      d.stepIndex++;
+      save();
+      renderAll();
+      renderInbox();
       return;
     }
 
-    if (poStep < aprovadores.length - 1){
-      poStep++;
-    } else {
-      po.status = "APROVADO";
-      po = null;
+    // CPO finaliza
+    if(d.type === "RC"){
+      d.status = "APROVADA";
+      d.finalizedAt = nowMs();
+      d.finalizedBy = "CPO";
+      // cria PO automático
+      const poId = "PO" + nowMs().toString().slice(-7);
+      const poDoc = {
+        type: "PO",
+        id: poId,
+        fornecedor: d.fornecedor,
+        valor: d.valor,
+        economia: 0,
+        status: "EM APROVAÇÃO",
+        stepIndex: 0,
+        createdAt: nowMs(),
+        finalizedAt: null,
+        finalizedBy: null,
+        parentRcId: d.id,
+        approvals: []
+      };
+      docs.unshift(poDoc);
+    }else{
+      d.status = "APROVADO";
+      d.finalizedAt = nowMs();
+      d.finalizedBy = "CPO";
     }
 
-    updateME23N();
+    save();
+    renderAll();
+    renderInbox();
   }
 
-  function updateME28N(){
-    $("rcApStatus").innerText = rc?.status || "—";
-    $("rcPend").innerText = rc ? aprovadores[rcStep] : "—";
+  function rejectDoc(docId){
+    const actor = currentActor();
+    const idx = docs.findIndex(d => d.id === docId);
+    if(idx < 0) return;
 
-    $("rcTimeline").innerHTML = aprovadores
-      .map((a,i)=> `<div class="${rc && i < rcStep ? 'done' : 'wait'}">${a}</div>`)
-      .join("");
+    const d = docs[idx];
+    if(d.status !== "EM APROVAÇÃO"){
+      alert("Documento já finalizado.");
+      return;
+    }
+    if(aprovadores[d.stepIndex] !== actor){
+      alert("Este documento não está pendente para o seu nível.");
+      return;
+    }
+
+    d.approvals.push({ by: actor, action: "REPROVADO", at: nowMs() });
+
+    if(d.type === "RC"){
+      d.status = "REPROVADA";
+    }else{
+      d.status = "REPROVADO";
+    }
+    d.finalizedAt = nowMs();
+    d.finalizedBy = actor;
+
+    save();
+    renderAll();
+    renderInbox();
   }
 
-  function updateME23N(){
-    $("poNum").innerText = po?.num || "—";
-    $("poStatus").innerText = po?.status || "—";
-    $("poPend").innerText = po ? aprovadores[poStep] : "—";
+  function viewDoc(docId){
+    const d = docs.find(x => x.id === docId);
+    if(!d){
+      $("docDetail").innerText = "Documento não encontrado.";
+      return;
+    }
 
-    $("poTimeline").innerHTML = aprovadores
-      .map((a,i)=> `<div class="${po && i < poStep ? 'done' : 'wait'}">${a}</div>`)
-      .join("");
-  }
+    const steps = aprovadores.map((ap, i) => {
+      const ev = d.approvals.find(e => e.by === ap); // simplificação: 1 ação por nível
+      let cls = "wait";
+      let right = "Pendente";
 
-  function updateCiclo(){
-    let total = 0;
+      if(ev){
+        cls = (ev.action === "APROVADO") ? "done" : "rej";
+        right = `${ev.action} em ${formatDate(ev.at)}`;
+      }else if(d.status !== "EM APROVAÇÃO" && i <= d.stepIndex){
+        // se finalizado sem evento (não deveria), marca done
+        cls = "done";
+        right = "Concluído";
+      }else if(d.status === "EM APROVAÇÃO" && i < d.stepIndex){
+        cls = "done";
+        right = "Aprovado";
+      }else{
+        cls = "wait";
+        right = (i === d.stepIndex) ? "Pendente" : "—";
+      }
 
-    $("cicloTabela").innerHTML = historico.map(h => {
-      total += h.rc.valor;
-      return `<tr>
-        <td>${h.rc.num}</td>
-        <td>${h.po.num}</td>
-        <td>Grupo Igor Soares</td>
-        <td>R$ ${h.rc.valor}</td>
-        <td><span class="status ${h.po.status === 'APROVADO' ? 'aprovadoBadge' : 'pendenteBadge'}">${h.po.status}</span></td>
-        <td>-</td>
-      </tr>`;
+      return `<div class="step ${cls}">
+        <div><b>${ap}</b></div>
+        <div class="muted" style="font-size:12px">${right}</div>
+      </div>`;
     }).join("");
 
-    $("kReq").innerText = historico.length;
-    $("kPO").innerText = historico.length;
-    $("kValor").innerText = "R$ " + total;
-    $("kTicket").innerText = "R$ " + (historico.length ? (total / historico.length).toFixed(2) : "0");
+    $("docDetail").innerHTML = `
+      <div class="row" style="align-items:flex-start">
+        <div>
+          <div class="muted" style="font-size:12px">Documento</div>
+          <div style="font-weight:900;font-size:16px">${d.type} ${d.id}</div>
+          <div class="muted" style="margin-top:6px">
+            Fornecedor: <b>${d.fornecedor}</b> · Valor: <b>R$ ${money(d.valor)}</b>
+            ${d.type==="RC" ? " · Economia: <b>R$ "+money(d.economia)+"</b>" : ""}
+          </div>
+        </div>
+        <div>
+          <span class="${statusToBadgeClass(d.status)}">${d.status}</span>
+          <div class="muted" style="font-size:12px;margin-top:6px">
+            Nível atual: <b>${d.status==="EM APROVAÇÃO" ? aprovadores[d.stepIndex] : "—"}</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline">${steps}</div>
+
+      <div class="muted" style="margin-top:10px">
+        Criado em: <b>${formatDate(d.createdAt)}</b> · Finalizado em: <b>${formatDate(d.finalizedAt)}</b> · Finalizado por: <b>${d.finalizedBy || "—"}</b>
+      </div>
+    `;
   }
 
-  function exportarPPT(){
-    alert("Exportação PowerPoint simulada.\n(Em produção usar pptxgenjs ou backend)");
+  // ====== Executive KPIs ======
+  function computeExecutive(){
+    const pend = docs.filter(d => d.status === "EM APROVAÇÃO");
+    const aprov = docs.filter(d => d.status === "APROVADA" || d.status === "APROVADO");
+    const reprov = docs.filter(d => d.status === "REPROVADA" || d.status === "REPROVADO");
+
+    const valorTravado = pend.reduce((a,d)=>a + (d.valor||0), 0);
+
+    const slaList = pend.map(d => daysBetweenMs(d.createdAt, nowMs()));
+    const slaMedio = slaList.length ? (slaList.reduce((a,b)=>a+b,0) / slaList.length) : 0;
+    const slaMax = slaList.length ? Math.max(...slaList) : 0;
+
+    const economia = docs
+      .filter(d => d.type === "RC" && d.status === "APROVADA")
+      .reduce((a,d)=>a + (d.economia||0), 0);
+
+    const pendPorNivel = aprovadores.map((lvl, idx) => {
+      const rcCount = pend.filter(d => d.type==="RC" && d.stepIndex===idx).length;
+      const poCount = pend.filter(d => d.type==="PO" && d.stepIndex===idx).length;
+      const valor = pend.filter(d => d.stepIndex===idx).reduce((a,d)=>a + (d.valor||0), 0);
+      return { lvl, rcCount, poCount, valor };
+    });
+
+    // top fornecedores (por valor total, incluindo pendentes + finalizados)
+    const map = new Map();
+    docs.forEach(d => {
+      const key = d.fornecedor || "—";
+      const cur = map.get(key) || { fornecedor:key, valor:0, docs:0 };
+      cur.valor += (d.valor||0);
+      cur.docs += 1;
+      map.set(key, cur);
+    });
+    const topFornecedores = [...map.values()].sort((a,b)=>b.valor-a.valor).slice(0,5);
+
+    return {
+      pend, aprov, reprov,
+      valorTravado,
+      slaMedio, slaMax,
+      economia,
+      pendPorNivel,
+      topFornecedores
+    };
   }
+
+  // ====== Renderers ======
+  function renderHome(){
+    const ex = computeExecutive();
+    $("asof").innerText = "Atualizado em " + new Date().toLocaleString("pt-BR");
+
+    $("kTravado").innerText = "R$ " + money(ex.valorTravado);
+    $("kSlaMedio").innerText = ex.slaMedio ? ex.slaMedio.toFixed(1) : "0";
+    $("kSlaMax").innerText = String(ex.slaMax || 0);
+    $("kEconomia").innerText = "R$ " + money(ex.economia);
+
+    const pendActor = pendingForActor(currentActor());
+    $("tRcsPend").innerText = String(ex.pend.filter(d => d.type==="RC").length);
+    $("tPendActor").innerText = String(pendActor.length);
+    $("tPendActorLabel").innerText = "Pendente p/ " + currentActor();
+    $("tDocs").innerText = String(docs.length);
+    $("tAprovados").innerText = String(ex.aprov.length);
+
+    $("pendTabelaHome").innerHTML = ex.pendPorNivel.map(r => `
+      <tr>
+        <td><b>${r.lvl}</b></td>
+        <td>${r.rcCount}</td>
+        <td>${r.poCount}</td>
+        <td>R$ ${money(r.valor)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderME51N(){
+    $("lastRc").innerText = lastCreatedDoc?.id || "—";
+  }
+
+  function renderInbox(){
+    const actor = currentActor();
+    const pend = pendingForActor(actor);
+
+    const list = pend.filter(d => {
+      if(inboxFilter === "ALL") return true;
+      return d.type === inboxFilter;
+    });
+
+    if(list.length === 0){
+      $("inboxTabela").innerHTML = `
+        <tr>
+          <td colspan="7" class="muted">
+            Nenhuma pendência para <b>${actor}</b> com o filtro atual.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    $("inboxTabela").innerHTML = list.map(d => `
+      <tr>
+        <td><b>${d.type}</b></td>
+        <td>${d.id}</td>
+        <td>${d.fornecedor}</td>
+        <td>R$ ${money(d.valor)}</td>
+        <td>${daysBetweenMs(d.createdAt, nowMs())}</td>
+        <td><span class="${statusToBadgeClass(d.status)}">${d.status}</span></td>
+        <td style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="gray" onclick="viewDoc('${d.id}')">Ver</button>
+          <button class="green" onclick="approveDoc('${d.id}')">Aprovar</button>
+          <button class="red" onclick="rejectDoc('${d.id}')">Reprovar</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function renderCiclo(){
+    const ex = computeExecutive();
+
+    $("kTravado2").innerText = "R$ " + money(ex.valorTravado);
+    $("kSlaMedio2").innerText = ex.slaMedio ? ex.slaMedio.toFixed(1) : "0";
+    $("kSlaMax2").innerText = String(ex.slaMax || 0);
+    $("kEconomia2").innerText = "R$ " + money(ex.economia);
+
+    $("pendTabela").innerHTML = ex.pendPorNivel.map(r => `
+      <tr>
+        <td><b>${r.lvl}</b></td>
+        <td>${r.rcCount}</td>
+        <td>${r.poCount}</td>
+        <td>R$ ${money(r.valor)}</td>
+      </tr>
+    `).join("");
+
+    $("fornTabela").innerHTML = ex.topFornecedores.map(r => `
+      <tr>
+        <td><b>${r.fornecedor}</b></td>
+        <td>R$ ${money(r.valor)}</td>
+        <td>${r.docs}</td>
+      </tr>
+    `).join("");
+
+    const recent = docs.slice(0, 15);
+    $("docsTabela").innerHTML = recent.map(d => `
+      <tr>
+        <td><b>${d.type}</b></td>
+        <td>${d.id}</td>
+        <td>${d.fornecedor}</td>
+        <td>R$ ${money(d.valor)}</td>
+        <td><span class="${statusToBadgeClass(d.status)}">${d.status}</span></td>
+        <td>${d.status==="EM APROVAÇÃO" ? aprovadores[d.stepIndex] : "—"}</td>
+        <td class="muted" style="font-size:12px">
+          Criado: ${formatDate(d.createdAt)}<br/>
+          Final: ${formatDate(d.finalizedAt)}
+        </td>
+      </tr>
+    `).join("") || `<tr><td colspan="7" class="muted">Sem dados ainda.</td></tr>`;
+  }
+
+  function renderRel(){
+    const ex = computeExecutive();
+    $("rTotal").innerText = docs.length;
+    $("rAprov").innerText = ex.aprov.length;
+    $("rReprov").innerText = ex.reprov.length;
+    $("rPend").innerText = ex.pend.length;
+
+    $("relTabela").innerHTML = docs.map(d => `
+      <tr>
+        <td><b>${d.type}</b></td>
+        <td>${d.id}</td>
+        <td>${d.fornecedor}</td>
+        <td>R$ ${money(d.valor)}</td>
+        <td><span class="${statusToBadgeClass(d.status)}">${d.status}</span></td>
+        <td>${d.status==="EM APROVAÇÃO" ? aprovadores[d.stepIndex] : "—"}</td>
+        <td class="muted" style="font-size:12px">${formatDate(d.createdAt)}</td>
+        <td class="muted" style="font-size:12px">${formatDate(d.finalizedAt)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="8" class="muted">Sem dados ainda.</td></tr>`;
+  }
+
+  function renderAll(){
+    renderHome();
+    // se estiver em outra tela, atualiza só quando necessário
+    if(!$("me51n").classList.contains("hidden")) renderME51N();
+    if(!$("inbox").classList.contains("hidden")) renderInbox();
+    if(!$("ciclo").classList.contains("hidden")) renderCiclo();
+    if(!$("rel").classList.contains("hidden")) renderRel();
+  }
+
+  // ====== Export ======
+  function exportCSV(){
+    const header = ["type","id","fornecedor","valor","economia","status","nivel","createdAt","finalizedAt","finalizedBy","parentRcId"].join(",");
+    const rows = docs.map(d => {
+      const nivel = (d.status==="EM APROVAÇÃO") ? aprovadores[d.stepIndex] : "";
+      return [
+        d.type,
+        d.id,
+        (d.fornecedor||"").replaceAll(","," "),
+        d.valor||0,
+        d.economia||0,
+        d.status,
+        nivel,
+        d.createdAt||"",
+        d.finalizedAt||"",
+        d.finalizedBy||"",
+        d.parentRcId||""
+      ].join(",");
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cockpit_compras_demo.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ====== Init ======
+  (function init(){
+    load();
+    renderAll();
+  })();
 </script>
 </body>
 </html>
