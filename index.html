@@ -20,7 +20,9 @@
 
     --shadow: 0 10px 30px rgba(17,24,39,.10);
     --shadow2: 0 18px 50px rgba(17,24,39,.16);
-    --radius: 16px;
+
+    /* MENOS ARREDONDADO */
+    --radius: 1px;
 
     --goodBg:#d1fae5; --goodFg:#065f46;
     --warnBg:#fef3c7; --warnFg:#92400e;
@@ -72,27 +74,28 @@
     flex-wrap:wrap;
   }
 
-  select, input, button{
+  /* Controles do header (evita afetar inputs do modal PunchOut) */
+  header select, header input, header button{
     font-size:14px;
-    border-radius:12px;
+    border-radius: var(--radius);
     padding:10px 12px;
     border:1px solid rgba(255,255,255,.20);
     outline:none;
   }
 
-  select, input{
+  header select, header input{
     background:rgba(255,255,255,.12);
     color:#fff;
     backdrop-filter: blur(6px);
   }
-  select option{ color:#111; }
-
-  input::placeholder{ color: rgba(255,255,255,.75); }
+  header select option{ color:#111; }
+  header input::placeholder{ color: rgba(255,255,255,.75); }
 
   button{
     border:none;
     cursor:pointer;
     color:#fff;
+    border-radius: var(--radius);
     background: linear-gradient(90deg, var(--primary), var(--primary2));
     box-shadow: 0 10px 20px rgba(10,110,209,.18);
     transition: transform .06s ease, filter .18s ease;
@@ -121,16 +124,18 @@
   #catalog .popup input[type="number"],
   #catalog .popup input[type="text"],
   #catalog .popup select{
-  background:#fff;
-  color:#111827;
-  border:1px solid #e5e7eb;
+    background:#fff !important;
+    color:#111827 !important;
+    border:1px solid #e5e7eb !important;
+    border-radius: var(--radius) !important;
   }
-
-/* também corrige placeholder, se ele estiver claro demais */
-#catalog .popup input::placeholder{
-  color:#6b7280;
-}
-
+  #catalog .popup input::placeholder{
+    color:#6b7280 !important;
+  }
+  #catalog .popup input.qty{
+    width:100px;
+    padding:10px;
+  }
 
   /* Tiles */
   .tiles{
@@ -166,7 +171,30 @@
     pointer-events:none;
   }
 
-  .tile h3{ margin:0; font-size:14px; letter-spacing:.2px; }
+  /* Ícone + título com distribuição uniforme */
+  .tile h3{
+    margin:0;
+    font-size:14px;
+    letter-spacing:.2px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    line-height:1.2;
+  }
+  .tile .icon{
+    width:22px;
+    height:22px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 22px;
+    border:1px solid rgba(229,231,235,.95);
+    border-radius: var(--radius);
+    background:#fff;
+    color:#334155;
+    font-weight:900;
+  }
+
   .tile .sub{ margin-top:6px; color:var(--muted); font-size:12px; }
   .tile .metric-row{ display:flex; align-items:baseline; gap:10px; margin-top:12px; flex-wrap:wrap; }
   .tile .metric{ font-size:30px; font-weight:800; color:var(--primary); letter-spacing:.2px; }
@@ -208,11 +236,17 @@
   }
 
   /* Tables */
+  .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .table{
     width:100%;
     border-collapse:collapse;
     background:#fff;
-    border-radius: 14px;
+    border-radius: var(--radius);
     overflow:hidden;
     box-shadow: 0 6px 18px rgba(17,24,39,.08);
     margin-top:10px;
@@ -223,14 +257,21 @@
     text-align:left;
     vertical-align:middle;
   }
-  .table th{ background:#f3f4f6; font-weight:800; color:#374151; font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+  .table th{
+    background:#f3f4f6;
+    font-weight:800;
+    color:#374151;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+  }
   .table tr:hover td{ background:#f8fafc; }
 
-  /* Status badges */
+  /* Status badges (menos arredondado) */
   .status{
     font-weight:800;
     padding:6px 10px;
-    border-radius:999px;
+    border-radius: var(--radius);
     font-size:12px;
     display:inline-block;
     white-space:nowrap;
@@ -246,7 +287,7 @@
     padding:10px 10px;
     margin:8px 0 0;
     border-left:4px solid #cbd5e1;
-    border-radius:10px;
+    border-radius: var(--radius);
     background:#fbfbfb;
     display:flex;
     align-items:center;
@@ -295,7 +336,7 @@
     background:#eef3f8;
     padding:14px;
     border-left:6px solid var(--primary);
-    border-radius:12px;
+    border-radius: var(--radius);
     font-weight:800;
     margin-bottom:12px;
   }
@@ -316,7 +357,7 @@
   .chip{
     border:1px solid rgba(229,231,235,.95);
     background:#fff;
-    border-radius:999px;
+    border-radius: var(--radius);
     padding:8px 10px;
     cursor:pointer;
     font-weight:800;
@@ -334,6 +375,10 @@
   @media (max-width: 768px){
     .container{ padding:16px; }
     .tile .metric{ font-size:26px; }
+
+    /* No celular, evita “distorcer”: tabela rola horizontal */
+    .table{ min-width: 860px; }
+    .table th, .table td{ white-space: nowrap; }
   }
 </style>
 </head>
@@ -389,7 +434,7 @@
 
   <div class="tiles">
     <div class="tile" onclick="openME51N()">
-      <h3>ME51N – Criar Requisição</h3>
+      <h3><span class="icon" aria-hidden="true">R</span>ME51N – Criar Requisição</h3>
       <div class="sub">Simular PunchOut e gerar RCs em fila</div>
       <div class="metric-row">
         <div class="metric" id="tRcsPend">0</div>
@@ -398,7 +443,7 @@
     </div>
 
     <div class="tile" onclick="openInbox()">
-      <h3>INBOX – Aprovações</h3>
+      <h3><span class="icon" aria-hidden="true">A</span>INBOX – Aprovações</h3>
       <div class="sub">Fila por nível (Coordenador → Gerente → CPO)</div>
       <div class="metric-row">
         <div class="metric" id="tPendActor">0</div>
@@ -407,7 +452,7 @@
     </div>
 
     <div class="tile" onclick="openCiclo()">
-      <h3>Ciclo de Compra – Visão Executiva</h3>
+      <h3><span class="icon" aria-hidden="true">C</span>Ciclo de Compra – Visão Executiva</h3>
       <div class="sub">Pendências por nível + top fornecedores</div>
       <div class="metric-row">
         <div class="metric" id="tDocs">0</div>
@@ -416,7 +461,7 @@
     </div>
 
     <div class="tile" onclick="openRel()">
-      <h3>Relatórios</h3>
+      <h3><span class="icon" aria-hidden="true">L</span>Relatórios</h3>
       <div class="sub">Histórico (aprovado/reprovado/pendente)</div>
       <div class="metric-row">
         <div class="metric" id="tAprovados">0</div>
@@ -430,12 +475,15 @@
       <h2 style="font-size:14px;margin:0;">Pendências por nível (snapshot)</h2>
       <small class="muted">RC e PO em aprovação</small>
     </div>
-    <table class="table">
-      <thead>
-        <tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr>
-      </thead>
-      <tbody id="pendTabelaHome"></tbody>
-    </table>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr>
+        </thead>
+        <tbody id="pendTabelaHome"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -458,10 +506,12 @@
       </div>
     </div>
 
-    <table class="table" style="margin-top:12px">
-      <thead><tr><th>Item</th><th>Qtd</th><th>Valor</th><th>Fornecedor</th></tr></thead>
-      <tbody id="rcItems"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table" style="margin-top:12px">
+        <thead><tr><th>Item</th><th>Qtd</th><th>Valor</th><th>Fornecedor</th></tr></thead>
+        <tbody id="rcItems"></tbody>
+      </table>
+    </div>
 
     <div class="row" style="margin-top:10px">
       <div><b>Total:</b> R$ <span id="rcTotal">0</span></div>
@@ -498,15 +548,17 @@
       </div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>SLA (dias)</th>
-          <th>Status</th><th>Ação</th>
-        </tr>
-      </thead>
-      <tbody id="inboxTabela"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>SLA (dias)</th>
+            <th>Status</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="inboxTabela"></tbody>
+      </table>
+    </div>
   </div>
 
   <div style="margin-top:14px" class="panel">
@@ -537,10 +589,13 @@
       <h2 style="font-size:14px;margin:0;">Pendências por nível</h2>
       <small class="muted">Separado por RC e PO</small>
     </div>
-    <table class="table">
-      <thead><tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr></thead>
-      <tbody id="pendTabela"></tbody>
-    </table>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Nível</th><th>RC pendentes</th><th>PO pendentes</th><th>Valor pendente</th></tr></thead>
+        <tbody id="pendTabela"></tbody>
+      </table>
+    </div>
   </div>
 
   <div style="margin-top:14px" class="panel">
@@ -548,10 +603,13 @@
       <h2 style="font-size:14px;margin:0;">Top fornecedores</h2>
       <small class="muted">Ranking por valor total de documentos</small>
     </div>
-    <table class="table">
-      <thead><tr><th>Fornecedor</th><th>Valor total</th><th>Documentos</th></tr></thead>
-      <tbody id="fornTabela"></tbody>
-    </table>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Fornecedor</th><th>Valor total</th><th>Documentos</th></tr></thead>
+        <tbody id="fornTabela"></tbody>
+      </table>
+    </div>
   </div>
 
   <div style="margin-top:14px" class="panel">
@@ -559,10 +617,13 @@
       <h2 style="font-size:14px;margin:0;">Documentos recentes</h2>
       <small class="muted">RC e PO (pendente/aprovado/reprovado)</small>
     </div>
-    <table class="table">
-      <thead><tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível atual</th><th>Datas</th></tr></thead>
-      <tbody id="docsTabela"></tbody>
-    </table>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível atual</th><th>Datas</th></tr></thead>
+        <tbody id="docsTabela"></tbody>
+      </table>
+    </div>
 
     <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap">
       <button class="gray" onclick="openRel()">Abrir Relatórios</button>
@@ -587,12 +648,14 @@
       </div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível</th><th>Criado em</th><th>Finalizado em</th></tr>
-      </thead>
-      <tbody id="relTabela"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Tipo</th><th>ID</th><th>Fornecedor</th><th>Valor</th><th>Status</th><th>Nível</th><th>Criado em</th><th>Finalizado em</th></tr>
+        </thead>
+        <tbody id="relTabela"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -608,10 +671,12 @@
       <small class="muted">Selecione itens e envie ao SAP (gera RC)</small>
     </div>
 
-    <table class="table">
-      <thead><tr><th>Item</th><th>Descrição</th><th>Valor (R$)</th><th>Qtd</th></tr></thead>
-      <tbody id="punchTable"></tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Item</th><th>Descrição</th><th>Valor (R$)</th><th>Qtd</th></tr></thead>
+        <tbody id="punchTable"></tbody>
+      </table>
+    </div>
 
     <div class="row" style="margin-top:12px">
       <div class="muted">Economia/evitado: <b id="ecoHint">—</b> (simulação)</div>
@@ -745,8 +810,7 @@
         <td>${it.desc}</td>
         <td>${money(it.preco)}</td>
         <td>
-          <input id="q_${idx}" type="number" min="0" value="0"
-            style="width:100px;border:1px solid #e5e7eb;border-radius:12px;padding:10px" />
+          <input class="qty" id="q_${idx}" type="number" min="0" value="0" />
         </td>
       </tr>
     `).join("");
@@ -924,7 +988,6 @@
         cls = (ev.action === "APROVADO") ? "done" : "rej";
         right = `${ev.action} em ${formatDate(ev.at)}`;
       }else if(d.status !== "EM APROVAÇÃO" && i <= d.stepIndex){
-        // se finalizado sem evento (não deveria), marca done
         cls = "done";
         right = "Concluído";
       }else if(d.status === "EM APROVAÇÃO" && i < d.stepIndex){
@@ -990,7 +1053,6 @@
       return { lvl, rcCount, poCount, valor };
     });
 
-    // top fornecedores (por valor total, incluindo pendentes + finalizados)
     const map = new Map();
     docs.forEach(d => {
       const key = d.fornecedor || "—";
@@ -1001,14 +1063,7 @@
     });
     const topFornecedores = [...map.values()].sort((a,b)=>b.valor-a.valor).slice(0,5);
 
-    return {
-      pend, aprov, reprov,
-      valorTravado,
-      slaMedio, slaMax,
-      economia,
-      pendPorNivel,
-      topFornecedores
-    };
+    return { pend, aprov, reprov, valorTravado, slaMedio, slaMax, economia, pendPorNivel, topFornecedores };
   }
 
   // ====== Renderers ======
@@ -1144,7 +1199,6 @@
 
   function renderAll(){
     renderHome();
-    // se estiver em outra tela, atualiza só quando necessário
     if(!$("me51n").classList.contains("hidden")) renderME51N();
     if(!$("inbox").classList.contains("hidden")) renderInbox();
     if(!$("ciclo").classList.contains("hidden")) renderCiclo();
