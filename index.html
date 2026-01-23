@@ -1,60 +1,317 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>PunchOut Demo – Materiais</title>
-  <script src="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb-browser.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 24px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 6px; font-size: 12px; }
-    th { background: #eee; }
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAP Fiori – Ciclo Completo de Compras (Punchout Demo)</title>
 
-<h2>Catálogo de Materiais (Demo)</h2>
-<div id="status">Carregando dados...</div>
-<table id="table"></table>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0}
+.hidden{display:none}
+header{background:#354a5f;color:#fff;padding:15px 20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+input,button{padding:10px 15px;margin:5px;border:none;border-radius:6px;font-size:14px}
+input{flex:1;max-width:300px}
+button{background:#0a6ed1;color:#fff;cursor:pointer;transition:background 0.3s}
+button:hover{background:#0854b0}
+button.secondary{background:#6a6d70}
+button.secondary:hover{background:#555}
+.container{padding:25px;max-width:1200px;margin:0 auto}
+.tile{display:inline-block;width:220px;height:130px;background:#fff;margin:15px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;border-radius:8px;transition:transform 0.2s}
+.tile:hover{transform:translateY(-5px)}
+.tile h3{margin:5px 0;font-size:16px}
+.tile p{font-size:14px;color:#666}
+.popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;width:90%;max-width:800px;max-height:90vh;overflow-y:auto;padding:25px;box-shadow:0 10px 40px rgba(0,0,0,0.3);z-index:1000;border-radius:12px}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border-bottom:1px solid #e0e3e7;padding:12px;text-align:left}
+th{background:#f0f2f5;font-weight:600;color:#333}
+tr:hover{background:#f8f9fa}
+.status{font-weight:bold;padding:4px 8px;border-radius:4px}
+.aprovado{background:#d4edda;color:#155724}
+.criado{background:#fff3cd;color:#856404}
+.fornecedor{background:#eef3f8;padding:15px;margin-bottom:20px;border-left:5px solid #0a6ed1;border-radius:6px;font-weight:600}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px 0}
+.stat-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);text-align:center}
+.stat-number{font-size:2em;font-weight:bold;color:#0a6ed1}
+@media(max-width:768px){.tile{width:90%;margin:10px auto;display:block}.popup{width:95%}}
+</style>
+</head>
+
+<body>
+<header>
+<h1>🚀 SAP Fiori Launchpad – Simulação Punchout</h1>
+<p>Demo completo: ME51N → Punchout → Aprovação → Relatórios</p>
+</header>
+
+<div class="container" id="launchpad">
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+    <input id="transacao" placeholder="Digite transação (ME51N / ME23N / RELATORIO)" style="border:1px solid #ddd">
+    <button onclick="executarTransacao()">Executar</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px">
+    <div class="tile" onclick="abrirME51N()">
+      <h3>📄 ME51N</h3>
+      <p>Criar Requisição</p>
+    </div>
+    <div class="tile" onclick="abrirME23N()">
+      <h3>📋 ME23N</h3>
+      <p>Exibir Pedido</p>
+    </div>
+    <div class="tile" onclick="abrirCatalogo()">
+      <h3>📊 Ciclo de Compra</h3>
+      <p>Visão Executiva</p>
+    </div>
+    <div class="tile" onclick="abrirRelatorios()">
+      <h3>📈 Relatórios</h3>
+      <p>Histórico Completo</p>
+    </div>
+  </div>
+</div>
+
+<!-- ME51N -->
+<div class="container hidden" id="me51n">
+  <h2>✏️ ME51N – Criar Requisição de Compra</h2>
+  <p><b>Requisição:</b> <span id="reqNum" style="font-size:1.2em;color:#0a6ed1">-</span></p>
+  <p>Status: <span id="reqStatus" class="status criado">Aguardando Punchout</span></p>
+  
+  <button onclick="abrirPunchout()" style="background:#28a745">🛒 Catálogo PunchOut</button>
+  
+  <h3>Itens Selecionados</h3>
+  <table>
+    <thead><tr><th>Material</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th></tr></thead>
+    <tbody id="itensReq"></tbody>
+  </table>
+  <p style="font-size:1.2em;text-align:right"><b>Total: R$ <span id="totalReq">0</span></b></p>
+  
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+    <button onclick="aprovarRequisicao()">✅ Aprovar Requisição</button>
+    <button class="secondary" onclick="voltar()">❌ Fechar</button>
+  </div>
+</div>
+
+<!-- ME23N -->
+<div class="container hidden" id="me23n">
+  <h2>👁️ ME23N – Visualizar Pedido</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="pedidoNum">-</div>
+      <div>Nº Pedido</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pedidoValor">R$ 0</div>
+      <div>Valor Total</div>
+    </div>
+    <div class="stat-card">
+      <span id="pedidoStatus" class="status criado">Criado</span>
+      <div>Status</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:30px">
+    <button onclick="aprovarPedido()">✅ Aprovar Pedido</button>
+    <button class="secondary" onclick="voltar()">❌ Fechar</button>
+  </div>
+</div>
+
+<!-- CICLO -->
+<div class="container hidden" id="catalogo">
+  <h2>🔄 Ciclo Completo de Compras – Dashboard Executivo</h2>
+  <table>
+    <thead>
+      <tr><th>Requisição</th><th>Data Aprov. REQ</th><th>Pedido</th><th>Data Aprov. PO</th><th>Valor</th><th>Prazo</th><th>Status</th></tr>
+    </thead>
+    <tbody id="cicloTabela"></tbody>
+  </table>
+  <button class="secondary" onclick="voltar()" style="margin-top:20px">❌ Fechar</button>
+</div>
+
+<!-- RELATÓRIOS -->
+<div class="container hidden" id="relatorios">
+  <h2>📊 Relatórios Gerenciais – Histórico Persistente</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalReqs">0</div>
+      <div>Requisições Totais</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="totalAprov">0</div>
+      <div>Aprovadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="valorTotal">R$ 0</div>
+      <div>Valor Total</div>
+    </div>
+  </div>
+  
+  <h3>Últimas 10 Requisições</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Data Criação</th><th>Status</th><th>Valor</th><th>Itens</th></tr></thead>
+    <tbody id="relatoriosLista"></tbody>
+  </table>
+  
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+    <button onclick="limparHistorico()" class="secondary">🗑️ Limpar Histórico</button>
+    <button onclick="voltar()">❌ Fechar</button>
+  </div>
+</div>
+
+<!-- PunchOut Popup -->
+<div class="overlay hidden" id="overlay" onclick="fecharPunchout()"></div>
+<div class="popup hidden" id="punchout">
+  <div class="fornecedor">
+    🏢 Fornecedor: <strong>Grupo Igor Soares - Materiais de Escritório</strong>
+  </div>
+  <h3>🛒 Catálogo PunchOut – Selecione Itens</h3>
+  <table>
+    <thead><tr><th>Material</th><th>Descrição</th><th>Preço (R$)</th><th>Estoque</th><th>Qtd</th></tr></thead>
+    <tbody>
+      <tr><td>A4-001</td><td>Resma A4 500 folhas</td><td>25,00</td><td>300</td><td><input id="q1" type="number" min="0" max="300" value="0"></td></tr>
+      <tr><td>CAN-001</td><td>Esferográfica azul BIC</td><td>3,50</td><td>1000</td><td><input id="q2" type="number" min="0" max="1000" value="0"></td></tr>
+      <tr><td>CAD-001</td><td>Caderno 10 matérias capa dura</td><td>18,90</td><td>200</td><td><input id="q3" type="number" min="0" max="200" value="0"></td></tr>
+    </tbody>
+  </table>
+  <div style="text-align:center;margin-top:20px">
+    <button onclick="enviarSAP()" style="font-size:16px;padding:12px 30px">🚀 Enviar ao SAP (ME51N)</button>
+    <button class="secondary" onclick="fecharPunchout()" style="font-size:16px;padding:12px 30px">❌ Cancelar</button>
+  </div>
+</div>
 
 <script>
-(async () => {
-  const status = document.getElementById("status");
+let requisicoes = JSON.parse(localStorage.getItem('historicoReqs')) || [];
+let pedidos = JSON.parse(localStorage.getItem('historicoPedidos')) || [];
+let requisicaoAtual = null;
+let pedidoAtual = null;
 
-  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
-  const worker = new Worker(bundle.mainWorker);
-  const logger = new duckdb.ConsoleLogger();
-  const db = new duckdb.AsyncDuckDB(logger, worker);
-  await db.instantiate(bundle.mainModule);
+function salvarHistorico() {
+  localStorage.setItem('historicoReqs', JSON.stringify(requisicoes));
+  localStorage.setItem('historicoPedidos', JSON.stringify(pedidos));
+}
 
-  const conn = await db.connect();
+function executarTransacao(){
+  const t = document.getElementById('transacao').value.toUpperCase();
+  if(t === "ME51N") abrirME51N();
+  if(t === "ME23N") abrirME23N();
+  if(t === "RELATORIO") abrirRelatorios();
+}
 
-  const parquetUrl =
-    const parquetUrl =
-  "https://raw.githubusercontent.com/irpsaress/sap-punchout-demo/main/data/Cadastro_materiais.parquet";
+function abrirME51N(){ esconder(); document.getElementById('me51n').classList.remove("hidden"); }
+function abrirME23N(){ esconder(); document.getElementById('me23n').classList.remove("hidden"); }
+function abrirCatalogo(){ esconder(); document.getElementById('catalogo').classList.remove("hidden"); atualizarCiclo(); }
+function abrirRelatorios(){ esconder(); document.getElementById('relatorios').classList.remove("hidden"); carregarRelatorios(); }
 
-  await db.registerFileURL("materiais.parquet", parquetUrl);
+function abrirPunchout(){ document.getElementById('overlay').classList.remove("hidden"); document.getElementById('punchout').classList.remove("hidden"); }
+function fecharPunchout(){ document.getElementById('overlay').classList.add("hidden"); document.getElementById('punchout').classList.add("hidden"); }
 
-  const result = await conn.query(`
-    SELECT * FROM 'materiais.parquet' LIMIT 50
-  `);
+function enviarSAP(){
+  let total = 0;
+  let itens = [];
+  const q1 = parseInt(document.getElementById('q1').value) || 0;
+  const q2 = parseInt(document.getElementById('q2').value) || 0;
+  const q3 = parseInt(document.getElementById('q3').value) || 0;
+  
+  if(q1 > 0){ itens.push(["Resma A4", q1, 25]); total += q1 * 25; }
+  if(q2 > 0){ itens.push(["Caneta Azul", q2, 3.5]); total += q2 * 3.5; }
+  if(q3 > 0){ itens.push(["Caderno", q3, 18.9]); total += q3 * 18.9; }
 
-  const table = document.getElementById("table");
-  const columns = result.schema.fields.map(f => f.name);
+  requisicaoAtual = {
+    num: "REQ" + Date.now().toString().slice(-6),
+    dataCriacao: new Date().toLocaleString('pt-BR'),
+    dataAprov: null,
+    status: "Criada",
+    total: total,
+    itens: itens
+  };
+  requisicoes.unshift(requisicaoAtual);
+  salvarHistorico();
 
-  table.innerHTML = `
-    <thead>
-      <tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr>
-    </thead>
-    <tbody>
-      ${result.toArray().map(row =>
-        `<tr>${columns.map(c => `<td>${row[c] ?? ""}</td>`).join("")}</tr>`
-      ).join("")}
-    </tbody>
-  `;
+  document.getElementById('reqNum').innerText = requisicaoAtual.num;
+  document.getElementById('totalReq').innerText = total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+  const itensReq = document.getElementById('itensReq');
+  itensReq.innerHTML = "";
+  itens.forEach(i => {
+    itensReq.innerHTML += `<tr><td>${i[0]}</td><td>${i[1]}</td><td>R$ ${i[2].toFixed(2)}</td><td>R$ ${(i[1]*i[2]).toFixed(2)}</td></tr>`;
+  });
 
-  status.innerText = `Registros exibidos: ${result.numRows}`;
-})();
+  fecharPunchout();
+}
+
+function aprovarRequisicao(){
+  requisicaoAtual.status = "Aprovada";
+  requisicaoAtual.dataAprov = new Date().toLocaleString('pt-BR');
+  document.getElementById('reqStatus').innerText = "Aprovada";
+  document.getElementById('reqStatus').className = "status aprovado";
+
+  pedidoAtual = {
+    num: "PO" + Date.now().toString().slice(-6),
+    reqNum: requisicaoAtual.num,
+    valor: requisicaoAtual.total,
+    status: "Criado",
+    dataAprov: null
+  };
+  pedidos.unshift(pedidoAtual);
+  salvarHistorico();
+
+  document.getElementById('pedidoNum').innerText = pedidoAtual.num;
+  document.getElementById('pedidoValor').innerText = `R$ ${pedidoAtual.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+}
+
+function aprovarPedido(){
+  pedidoAtual.status = "Aprovado";
+  pedidoAtual.dataAprov = new Date().toLocaleString('pt-BR');
+  document.getElementById('pedidoStatus').innerText = "Aprovado";
+  document.getElementById('pedidoStatus').className = "status aprovado";
+  salvarHistorico();
+}
+
+function atualizarCiclo(){
+  const tabela = document.getElementById('cicloTabela');
+  tabela.innerHTML = requisicoes.slice(0, 10).map(req => {
+    const ped = pedidos.find(p => p.reqNum === req.num);
+    return `<tr>
+      <td>${req.num}</td><td>${req.dataAprov || "-"}</td><td>${ped?.num || "-"}</td><td>${ped?.dataAprov || "-"}</td>
+      <td>R$ ${req.total.toLocaleString('pt-BR')}</td><td>20 dias</td><td><span class="status ${ped?.status === 'Aprovado' ? 'aprovado' : 'criado'}">${ped?.status || req.status}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:#666">Nenhuma requisição criada</td></tr>';
+}
+
+function carregarRelatorios(){
+  const totalReqsEl = document.getElementById('totalReqs');
+  const totalAprovEl = document.getElementById('totalAprov');
+  const valorTotalEl = document.getElementById('valorTotal');
+  const listaEl = document.getElementById('relatoriosLista');
+  
+  const totalReqs = requisicoes.length;
+  const totalAprov = requisicoes.filter(r => r.status === "Aprovada").length;
+  const valorTotal = requisicoes.reduce((sum, r) => sum + r.total, 0);
+  
+  totalReqsEl.textContent = totalReqs;
+  totalAprovEl.textContent = totalAprov;
+  valorTotalEl.textContent = valorTotal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+  
+  listaEl.innerHTML = requisicoes.slice(0, 10).map(r => {
+    return `<tr>
+      <td>${r.num}</td><td>${r.dataCriacao}</td><td><span class="status ${r.status === 'Aprovada' ? 'aprovado' : 'criado'}">${r.status}</span></td>
+      <td>R$ ${r.total.toLocaleString('pt-BR')}</td><td>${r.itens.length} itens</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:#666">Sem histórico</td></tr>';
+}
+
+function limparHistorico(){
+  if(confirm('🗑️ Limpar todo histórico de requisições e pedidos?\n(Dados salvos no navegador serão perdidos)')) {
+    requisicoes = []; pedidos = [];
+    localStorage.removeItem('historicoReqs');
+    localStorage.removeItem('historicoPedidos');
+    carregarRelatorios();
+    atualizarCiclo();
+    alert('✅ Histórico limpo!');
+  }
+}
+
+function voltar(){ esconder(); document.getElementById('launchpad').classList.remove("hidden"); }
+function esconder(){ document.querySelectorAll(".container").forEach(d => d.classList.add("hidden")); }
+
+// Carrega histórico ao iniciar
+atualizarCiclo();
+carregarRelatorios();
 </script>
 
 </body>
