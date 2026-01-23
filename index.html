@@ -2,61 +2,237 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAP Fiori Punchout – MARA Completo (112k Materiais)</title>
-<style>/* Mesmo CSS anterior - copie aqui */</style>
+<title>SAP Fiori – Ciclo Completo de Compras</title>
+ 
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+.hidden{display:none}
+header{background:#354a5f;color:#fff;padding:12px 20px}
+input,button{padding:8px;margin:5px 0}
+button{background:#0a6ed1;color:#fff;border:none;border-radius:4px;cursor:pointer}
+button.secondary{background:#6a6d70}
+.container{padding:20px}
+.tile{display:inline-block;width:200px;height:120px;background:#fff;margin:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,.1);cursor:pointer}
+.popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;width:75%;padding:20px;box-shadow:0 0 15px rgba(0,0,0,.3);z-index:10;border-radius:6px}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:9}
+ 
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border-bottom:1px solid #ddd;padding:10px;text-align:center}
+th{background:#f0f2f5;font-weight:600}
+ 
+.status{font-weight:bold}
+.aprovado{color:green}
+.criado{color:orange}
+ 
+.fornecedor{
+  background:#eef3f8;
+  padding:10px;
+  margin-bottom:10px;
+  border-left:4px solid #0a6ed1;
+  font-weight:bold;
+}
+</style>
 </head>
+ 
 <body>
-<!-- Mesma estrutura launchpad + telas (copie do anterior) -->
-
-<!-- Punchout Popup -->
-<div class="overlay hidden" id="overlay"></div>
-<div class="popup hidden" id="punchout">
-  <div class="fornecedor">🏢 SAP MARA – 112.423 Materiais (Carregados)</div>
-  <h3>🔍 Pesquisar Material</h3>
-  <div class="search-box">
-    <input id="pesquisaPunchout" placeholder="Texto breve (ex: PAP HIG, Cavalos)..." oninput="filtrarMateriais()">
-    <button onclick="limparPesquisa()" class="secondary">🔄 Limpar</button>
-  </div>
-  <div style="display:flex;justify-content:space-between">
-    <span id="resultadosCount">Carregando...</span>
-    <div id="paginacao" class="pagination"></div>
-  </div>
-  <table><thead><tr><th>Sel.</th><th>Material</th><th>Texto breve</th><th>Valor (R$)</th><th>NCM</th><th>Categoria</th></tr></thead><tbody id="materiaisLista"></tbody></table>
-  
-  <div class="carrinho-section">
-    <h3>🛒 Carrinho (Todas Colunas)</h3>
-    <table><thead><tr><th>Material</th><th>Texto breve</th><th>Valor</th><th>Qtd</th><th>NCM</th><th>Categoria</th><th>Total</th></tr></thead><tbody id="carrinhoTabela"></tbody><tfoot><tr><td colspan=6 class="right"><b>Total:</b></td><td id="totalCarrinho">R$ 0,00</td></tr></tfoot></table>
-  </div>
-  
-  <div style="text-align:center;margin-top:25px">
-    <button onclick="enviarSAP()" id="btnEnviar" disabled style="background:#28a745;padding:15px 40px;font-size:16px">🚀 Enviar SAP ME51N</button>
-    <button class="secondary" onclick="fecharPunchout()" style="padding:15px 40px;font-size:16px">❌ Cancelar</button>
+ 
+<header>SAP Fiori Launchpad – Simulação Executiva</header>
+ 
+<div class="container" id="launchpad">
+  <input id="transacao" placeholder="Digite a transação (ME51N / ME23N)">
+  <button onclick="executarTransacao()">Executar</button>
+  <div>
+    <div class="tile" onclick="abrirME51N()">ME51N<br>Requisição</div>
+    <div class="tile" onclick="abrirME23N()">ME23N<br>Pedido</div>
+    <div class="tile" onclick="abrirCatalogo()">Catálogo<br>Ciclo de Compra</div>
   </div>
 </div>
-
+ 
+<!-- ME51N -->
+<div class="container hidden" id="me51n">
+<h2>ME51N – Criar Requisição</h2>
+ 
+<p><b>Requisição:</b> <span id="reqNum">-</span></p>
+<p>Status: <span id="reqStatus" class="status criado">Criada</span></p>
+ 
+<button onclick="abrirPunchout()">Catálogo (PunchOut)</button>
+ 
+<table>
+<thead><tr><th>Material</th><th>Qtd</th><th>Valor</th></tr></thead>
+<tbody id="itensReq"></tbody>
+</table>
+ 
+<p><b>Total:</b> R$ <span id="totalReq">0</span></p>
+ 
+<button onclick="aprovarRequisicao()">Aprovar Requisição</button>
+<button class="secondary" onclick="voltar()">Fechar</button>
+</div>
+ 
+<!-- ME23N -->
+<div class="container hidden" id="me23n">
+<h2>ME23N – Exibir Pedido</h2>
+ 
+<p><b>Pedido:</b> <span id="pedidoNum"></span></p>
+<p><b>Valor:</b> R$ <span id="pedidoValor"></span></p>
+<p>Status: <span id="pedidoStatus" class="status criado">Criado</span></p>
+ 
+<button onclick="aprovarPedido()">Aprovar Pedido</button>
+<button class="secondary" onclick="voltar()">Fechar</button>
+</div>
+ 
+<!-- CICLO -->
+<div class="container hidden" id="catalogo">
+<h2>Ciclo de Compra – Visão Executiva</h2>
+ 
+<table>
+<thead>
+<tr>
+<th>Requisição</th>
+<th>Data Aprovação REQ</th>
+<th>Pedido</th>
+<th>Data Aprovação PO</th>
+<th>Valor</th>
+<th>Prazo</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="cicloTabela"></tbody>
+</table>
+ 
+<button class="secondary" onclick="voltar()">Fechar</button>
+</div>
+ 
+<!-- PunchOut -->
+<div class="overlay hidden" id="overlay"></div>
+<div class="popup hidden" id="punchout">
+ 
+<div class="fornecedor">
+Fornecedor: Grupo Igor Soares
+</div>
+ 
+<h3>Catálogo PunchOut – Materiais de Escritório</h3>
+ 
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>Descrição</th>
+<th>Preço (R$)</th>
+<th>Saldo</th>
+<th>Quantidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GENERICO</td>
+<td>A4 Resma 500 folhas</td>
+<td>25</td>
+<td>300</td>
+<td><input id="q1" type="number" min="0"></td>
+</tr>
+<tr>
+<td>GENERICO</td>
+<td>Esferográfica azul</td>
+<td>3</td>
+<td>1000</td>
+<td><input id="q2" type="number" min="0"></td>
+</tr>
+<tr>
+<td>GENERICO</td>
+<td>Caderno 10 matérias Capa dura</td>
+<td>18</td>
+<td>200</td>
+<td><input id="q3" type="number" min="0"></td>
+</tr>
+</tbody>
+</table>
+ 
+<br>
+<button onclick="enviarSAP()">Enviar ao SAP</button>
+<button class="secondary" onclick="fecharPunchout()">Cancelar</button>
+</div>
+ 
 <script>
-// TODOS OS 112.423 MATERIAIS EMBUTIDOS (dados reais do mara.xlsx)
-const TODOS_MATERIAIS=[{"Material":"10000102","Texto breve":"PAP HIG SUPRA FD 04X16X30M","Valor Unit.":17727,"NCM":"01","Categoria":"Animais vivos."},{"Material":"10000103","Texto breve":"PAP HIG SUPRA FD 06X12X30M","Valor Unit.":3871,"NCM":"01.01","Categoria":"Cavalos, asininos e muares, vivos."},{"Material":"10000104","Texto breve":"PAP HIG SUPRA FD 16X04X30M","Valor Unit.":5435,"NCM":"0101.2","Categoria":"- Cavalos:"},{"Material":"10000104","Texto breve":"PAP HIG SUPRA FD 04X16X30M","Valor Unit.":3433,"NCM":"0101.21.00","Categoria":"-- Reprodutores de raça pura"},{"Material":"10000105","Texto breve":"PAP HIG SUPRA FT 06X12X20M","Valor Unit.":7129,"NCM":"0101.29.00","Categoria":"-- Outros"},{"Material":"10000106","Texto breve":"Produto Exemplo 6","Valor Unit.":1500,"NCM":"02.01","Categoria":"Carne fresca"},{"Material":"10000107","Texto breve":"PAP HIG SUPRA Outro","Valor Unit.":2500,"NCM":"48.01","Categoria":"Papel para escrita"}/* ... CONTINUA COM TODOS OS 112423 REGISTROS MINIFICADOS ... */];
-console.log(`✅ Carregados ${TODOS_MATERIAIS.length} materiais MARA reais`);
-
-// Variáveis globais (copie do anterior)
-let materiaisFiltrados=[],paginaAtual=0,carrinho=[],ITENS_POR_PAGINA=50,requisicoes=[],pedidos=[],requisicaoAtual=null,pedidoAtual=null;
-
-// Funções (versão compacta)
-const formatarMoeda=v=>`R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-function filtrarMateriais(){const t=document.getElementById('pesquisaPunchout').value.toLowerCase().trim();materiaisFiltrados=t===''?TODOS_MATERIAIS:TODOS_MATERIAIS.filter(m=>m['Texto breve'].toLowerCase().includes(t));paginaAtual=0;document.getElementById('resultadosCount').textContent=`${materiaisFiltrados.length.toLocaleString()} resultados`;renderizarPagina();}
-function limparPesquisa(){document.getElementById('pesquisaPunchout').value='';filtrarMateriais();}
-function renderizarPagina(){const i=paginaAtual*ITENS_POR_PAGINA,f=i+ITENS_POR_PAGINA,p=materiaisFiltrados.slice(i,f);document.getElementById('materiaisLista').innerHTML=p.map((m,idx)=`<tr onclick="selecionarMaterial(${i+idx})" style="cursor:pointer"><td><input type="checkbox" onchange="toggleCarrinho(${i+idx},this.checked)"></td><td class="right">${m.Material}</td><td>${m['Texto breve']}</td><td class="right">${formatarMoeda(m['Valor Unit.'])}</td><td class="right">${m.NCM}</td><td>${m.Categoria}</td></tr>`).join('');renderizarPaginacao();atualizarCarrinho();}
-function renderizarPaginacao(){/* mesmo código anterior compacto */}
-function toggleCarrinho(idx,c){if(c)carrinho.push({...materiaisFiltrados[idx],qtd:1});else carrinho=carrinho.filter((item,i)=>item.Material!==materiaisFiltrados[idx].Material);atualizarCarrinho();}
-function selecionarMaterial(idx){/* toggle checkbox */}
-function atualizarCarrinho(){/* render carrinho com todas colunas + total */}
-function abrirPunchout(){materiaisFiltrados=TODOS_MATERIAIS;carrinho=[];paginaAtual=0;filtrarMateriais();document.getElementById('overlay').classList.remove('hidden');document.getElementById('punchout').classList.remove('hidden');}
-function enviarSAP(){/* mesmo, usando carrinho com todas colunas */}
-
-// Inicializa
-filtrarMateriais();
+let requisicao=null;
+let pedido=null;
+ 
+function executarTransacao(){
+  const t=transacao.value.toUpperCase();
+  if(t==="ME51N") abrirME51N();
+  if(t==="ME23N") abrirME23N();
+}
+ 
+function abrirME51N(){ esconder(); me51n.classList.remove("hidden"); }
+function abrirME23N(){ esconder(); me23n.classList.remove("hidden"); }
+function abrirCatalogo(){ esconder(); catalogo.classList.remove("hidden"); atualizarCiclo(); }
+ 
+function abrirPunchout(){ overlay.classList.remove("hidden"); punchout.classList.remove("hidden"); }
+function fecharPunchout(){ overlay.classList.add("hidden"); punchout.classList.add("hidden"); }
+ 
+function enviarSAP(){
+  let total=0;
+  let itens=[];
+  if(q1.value>0){itens.push(["Papel A4",q1.value,25]); total+=q1.value*25}
+  if(q2.value>0){itens.push(["Caneta Azul",q2.value,3]); total+=q2.value*3}
+  if(q3.value>0){itens.push(["Caderno",q3.value,18]); total+=q3.value*18}
+ 
+  requisicao={
+    num:"REQ"+Math.floor(Math.random()*90000),
+    dataAprov:null,
+    status:"Criada",
+    total:total
+  };
+ 
+  reqNum.innerText=requisicao.num;
+  totalReq.innerText=total;
+  itensReq.innerHTML="";
+  itens.forEach(i=>itensReq.innerHTML+=`<tr><td>${i[0]}</td><td>${i[1]}</td><td>${i[1]*i[2]}</td></tr>`);
+ 
+  fecharPunchout();
+}
+ 
+function aprovarRequisicao(){
+  requisicao.status="Aprovada";
+  requisicao.dataAprov=new Date().toLocaleDateString();
+  reqStatus.innerText="Aprovada";
+  reqStatus.className="status aprovado";
+ 
+  pedido={
+    num:"PO"+Math.floor(Math.random()*90000),
+    valor:requisicao.total,
+    status:"Criado",
+    dataAprov:null
+  };
+ 
+  pedidoNum.innerText=pedido.num;
+  pedidoValor.innerText=pedido.valor;
+}
+ 
+function aprovarPedido(){
+  pedido.status="Aprovado";
+  pedido.dataAprov=new Date().toLocaleDateString();
+  pedidoStatus.innerText="Aprovado";
+  pedidoStatus.className="status aprovado";
+}
+ 
+function atualizarCiclo(){
+  cicloTabela.innerHTML="";
+  if(!requisicao) return;
+  cicloTabela.innerHTML=`
+  <tr>
+    <td>${requisicao.num}</td>
+    <td>${requisicao.dataAprov||"-"}</td>
+    <td>${pedido?.num||"-"}</td>
+    <td>${pedido?.dataAprov||"-"}</td>
+    <td>${pedido?.valor||"-"}</td>
+    <td>20 dias</td>
+    <td>${pedido?.status||requisicao.status}</td>
+  </tr>`;
+}
+ 
+function voltar(){ esconder(); launchpad.classList.remove("hidden"); }
+function esconder(){ document.querySelectorAll(".container").forEach(d=>d.classList.add("hidden")); }
 </script>
+ 
 </body>
 </html>
