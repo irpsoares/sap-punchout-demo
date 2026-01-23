@@ -1,385 +1,529 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAP Fiori – PunchOut Demo</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SAP Fiori – Ciclo de Compras Executivo</title>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0}
-.hidden{display:none}
-header{background:#354a5f;color:#fff;padding:15px 20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-input,button{padding:10px 15px;margin:5px;border:none;border-radius:6px;font-size:14px}
-input{flex:1;max-width:300px}
-button{background:#0a6ed1;color:#fff;cursor:pointer;transition:background 0.3s}
-button:hover{background:#0854b0}
-button.secondary{background:#6a6d70}
-button.secondary:hover{background:#555}
-.container{padding:25px;max-width:1200px;margin:0 auto}
-.tile{display:inline-block;width:220px;height:130px;background:#fff;margin:15px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;border-radius:8px;transition:transform 0.2s}
-.tile:hover{transform:translateY(-5px)}
-.tile h3{margin:5px 0;font-size:16px}
-.tile p{font-size:14px;color:#666}
-.popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;width:90%;max-width:900px;max-height:90vh;overflow-y:auto;padding:25px;box-shadow:0 10px 40px rgba(0,0,0,0.3);z-index:1000;border-radius:12px}
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{border-bottom:1px solid #e0e3e7;padding:12px;text-align:left}
-th{background:#f0f2f5;font-weight:600;color:#333}
-tr:hover{background:#f8f9fa}
-.status{font-weight:bold;padding:4px 8px;border-radius:4px}
-.aprovado{background:#d4edda;color:#155724}
-.criado{background:#fff3cd;color:#856404}
-.fornecedor{background:#eef3f8;padding:15px;margin-bottom:20px;border-left:5px solid #0a6ed1;border-radius:6px;font-weight:600}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px 0}
-.stat-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);text-align:center}
-.stat-number{font-size:2em;font-weight:bold;color:#0a6ed1}
-.close-popup{position:absolute;top:10px;right:15px;font-size:20px;cursor:pointer;color:#555}
-.close-popup:hover{color:#000}
-@media(max-width:768px){.tile{width:90%;margin:10px auto;display:block}.popup{width:95%}}
+  :root{
+    --bg:#f4f6f8;
+    --header:#354a5f;
+    --primary:#0a6ed1;
+    --primaryHover:#0854b0;
+    --text:#1a1a1a;
+    --muted:#666;
+    --card:#fff;
+    --line:#e0e3e7;
+    --shadow:0 4px 12px rgba(0,0,0,.10);
+    --shadowStrong:0 10px 40px rgba(0,0,0,.30);
+    --radius:12px;
+  }
+
+  body{
+    font-family: Arial, sans-serif;
+    background:var(--bg);
+    margin:0;
+    color:var(--text);
+  }
+
+  .hidden{ display:none !important; }
+
+  header{
+    background:var(--header);
+    color:#fff;
+    padding:15px 20px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.10);
+  }
+  header h1{ margin:0; font-size:20px; }
+  header p{ margin:6px 0 0; opacity:.95; }
+
+  .container{
+    padding:25px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+
+  /* Controls */
+  .toolbar{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+  }
+
+  input, button{
+    padding:10px 15px;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+  }
+
+  input{
+    border:1px solid #ddd;
+    flex:1;
+    min-width:240px;
+    max-width:380px;
+    background:#fff;
+  }
+
+  button{
+    background:var(--primary);
+    color:#fff;
+    cursor:pointer;
+    transition:background .2s, transform .05s;
+  }
+  button:hover{ background:var(--primaryHover); }
+  button:active{ transform: translateY(1px); }
+
+  button.gray{ background:#6a6d70; }
+  button.gray:hover{ background:#555; }
+
+  button.green{ background:#28a745; }
+  button.green:hover{ background:#218838; }
+
+  /* Tiles */
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:20px;
+  }
+
+  .tile{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+    cursor:pointer;
+    transition:transform .2s, box-shadow .2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .tile:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 18px rgba(0,0,0,.14);
+  }
+  .tile::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:6px;
+    background:var(--primary);
+    opacity:.95;
+  }
+  .tile h3{
+    margin:0 0 6px;
+    font-size:16px;
+    padding-left:10px;
+  }
+  .tile div{
+    color:var(--muted);
+    font-size:14px;
+    padding-left:10px;
+  }
+
+  /* Tables */
+  .table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+    background:#fff;
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .table th, .table td{
+    border-bottom:1px solid var(--line);
+    padding:12px;
+    text-align:left;
+  }
+  .table th{
+    background:#f0f2f5;
+    font-weight:600;
+    color:#333;
+  }
+  .table tr:hover td{ background:#f8f9fa; }
+
+  /* Status / badges */
+  .status{
+    font-weight:bold;
+    padding:4px 10px;
+    border-radius:999px;
+    display:inline-block;
+    font-size:12px;
+  }
+  .aprovadoBadge{ background:#d4edda; color:#155724; }
+  .pendenteBadge{ background:#fff3cd; color:#856404; }
+
+  /* KPI */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin:15px 0;
+  }
+  .kpi{
+    background:#fff;
+    padding:18px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    text-align:center;
+  }
+  .kpi b{
+    display:block;
+    font-size:22px;
+    color:var(--primary);
+    margin-top:6px;
+  }
+
+  /* Timeline */
+  .timeline{
+    background:#fff;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-top:10px;
+  }
+  .timeline div{
+    padding:8px 10px;
+    margin:8px 0 0;
+    border-left:4px solid #ccc;
+    border-radius:6px;
+    background:#fbfbfb;
+  }
+  .timeline .done{ border-color:#2e7d32; }
+  .timeline .wait{ border-color:#ef6c00; }
+
+  /* Modal (overlay + popup) */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
+  .popup{
+    position:relative;
+    width: min(900px, 96vw);
+    max-height: 90vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:var(--radius);
+    box-shadow:var(--shadowStrong);
+    padding:22px;
+    z-index:1001;
+    pointer-events:auto;
+  }
+  .close-popup{
+    position:absolute;
+    top:10px;
+    right:12px;
+    font-size:18px;
+    cursor:pointer;
+    color:#555;
+    user-select:none;
+  }
+  .close-popup:hover{ color:#000; }
+
+  .fornecedor{
+    background:#eef3f8;
+    padding:14px;
+    border-left:5px solid var(--primary);
+    border-radius:10px;
+    font-weight:600;
+    margin-bottom:14px;
+  }
+
+  @media (max-width: 768px){
+    header h1{ font-size:18px; }
+    .container{ padding:18px; }
+  }
 </style>
 </head>
 
 <body>
 <header>
-<h1>SAP Fiori Launchpad – Simulação Punchout</h1>
-<p>Demo completo: ME51N → Punchout → Aprovação → Relatórios</p>
+  <h1>SAP Fiori Launchpad – Simulação Executiva de Compras</h1>
+  <p>Fluxo: ME51N → PunchOut → Aprovação RC → Aprovação PO → Visão Executiva</p>
 </header>
 
+<!-- LAUNCHPAD -->
 <div class="container" id="launchpad">
-  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px">
-    <input id="transacao" placeholder="Digite transação (ME51N / ME23N / RELATORIO)" style="border:1px solid #ddd">
-    <button id="btnExecutar">Executar</button>
+  <div class="toolbar">
+    <input id="transacao" placeholder="Digite: ME51N / ME28N / ME23N / CICLO" />
+    <button onclick="executarTransacao()">Executar</button>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px">
-    <div class="tile"><h3>📄 ME51N</h3><p>Criar Requisição</p></div>
-    <div class="tile"><h3>📋 ME23N</h3><p>Exibir Pedido</p></div>
-    <div class="tile"><h3>📊 Ciclo de Compra</h3><p>Visão Executiva</p></div>
-    <div class="tile"><h3>📈 Relatórios</h3><p>Histórico Completo</p></div>
+
+  <div class="tiles">
+    <div class="tile" onclick="openME51N()">
+      <h3>ME51N</h3>
+      <div>Criar Requisição</div>
+    </div>
+    <div class="tile" onclick="openME28N()">
+      <h3>ME28N</h3>
+      <div>Aprovar Requisição</div>
+    </div>
+    <div class="tile" onclick="openME23N()">
+      <h3>ME23N</h3>
+      <div>Aprovar Pedido</div>
+    </div>
+    <div class="tile" onclick="openCiclo()">
+      <h3>Ciclo de Compra</h3>
+      <div>Visão Executiva</div>
+    </div>
   </div>
 </div>
 
 <!-- ME51N -->
 <div class="container hidden" id="me51n">
-  <h2>✏️ ME51N – Criar Requisição de Compra</h2>
-  <p><b>Requisição:</b> <span id="reqNum" style="font-size:1.2em;color:#0a6ed1">-</span></p>
-  <p>Status: <span id="reqStatus" class="status criado">Aguardando Punchout</span></p>
-  
-  <button onclick="abrirPunchout()" style="background:#28a745">🛒 Catálogo PunchOut</button>
-  
-  <h3>Itens Selecionados</h3>
-  <table>
-    <thead><tr><th>Material</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th></tr></thead>
-    <tbody id="itensReq"></tbody>
+  <h2>ME51N – Criar Requisição</h2>
+  <button class="green" onclick="openCatalog()">Catálogo PunchOut</button>
+
+  <table class="table">
+    <thead><tr><th>Material</th><th>Qtd</th><th>Valor</th><th>Fornecedor</th></tr></thead>
+    <tbody id="rcItems"></tbody>
   </table>
-  <p style="font-size:1.2em;text-align:right"><b>Total: R$ <span id="totalReq">0</span></b></p>
-  
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-    <button onclick="aprovarRequisicao()">✅ Aprovar Requisição</button>
-    <button class="secondary" onclick="voltar()">❌ Fechar</button>
+
+  <p><b>Total:</b> R$ <span id="rcTotal">0</span></p>
+  <p>
+    Status:
+    <span id="rcStatus" class="status pendenteBadge">EM EDIÇÃO</span>
+  </p>
+
+  <button class="gray" onclick="back()">Fechar</button>
+</div>
+
+<!-- ME28N -->
+<div class="container hidden" id="me28n">
+  <h2>ME28N – Aprovação da Requisição</h2>
+  <p><b>RC:</b> <span id="rcNum">-</span></p>
+  <p>Status: <span id="rcApStatus">-</span></p>
+  <p>Pendente com: <span id="rcPend">-</span></p>
+
+  <div class="timeline" id="rcTimeline"></div>
+
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+    <button class="green" onclick="approveRC()">Aprovar</button>
+    <button class="gray" onclick="back()">Fechar</button>
   </div>
 </div>
 
 <!-- ME23N -->
 <div class="container hidden" id="me23n">
-  <h2>👁️ ME23N – Visualizar Pedido</h2>
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-number" id="pedidoNum">-</div>
-      <div>Nº Pedido</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="pedidoValor">R$ 0</div>
-      <div>Valor Total</div>
-    </div>
-    <div class="stat-card">
-      <span id="pedidoStatus" class="status criado">Criado</span>
-      <div>Status</div>
-    </div>
-  </div>
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:30px">
-    <button onclick="aprovarPedido()">✅ Aprovar Pedido</button>
-    <button class="secondary" onclick="voltar()">❌ Fechar</button>
+  <h2>ME23N – Aprovação do Pedido</h2>
+  <p><b>Pedido:</b> <span id="poNum">-</span></p>
+  <p>Status: <span id="poStatus">-</span></p>
+  <p>Pendente com: <span id="poPend">-</span></p>
+
+  <div class="timeline" id="poTimeline"></div>
+
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+    <button class="green" onclick="approvePO()">Aprovar</button>
+    <button class="gray" onclick="back()">Fechar</button>
   </div>
 </div>
 
 <!-- CICLO -->
-<div class="container hidden" id="catalogo">
-  <h2>🔄 Ciclo Completo de Compras – Dashboard Executivo</h2>
-  <table>
+<div class="container hidden" id="ciclo">
+  <h2>Ciclo de Compra – Visão Executiva</h2>
+
+  <div class="kpi-grid">
+    <div class="kpi">Requisições<b id="kReq">0</b></div>
+    <div class="kpi">Pedidos<b id="kPO">0</b></div>
+    <div class="kpi">Valor Total<b id="kValor">R$ 0</b></div>
+    <div class="kpi">Ticket Médio<b id="kTicket">R$ 0</b></div>
+  </div>
+
+  <table class="table">
     <thead>
-      <tr><th>Requisição</th><th>Data Aprov. REQ</th><th>Pedido</th><th>Data Aprov. PO</th><th>Valor</th><th>Prazo</th><th>Status</th></tr>
+      <tr>
+        <th>RC</th><th>PO</th><th>Fornecedor</th>
+        <th>Valor</th><th>Status</th><th>Pendente</th>
+      </tr>
     </thead>
     <tbody id="cicloTabela"></tbody>
   </table>
-  <button class="secondary" onclick="voltar()" style="margin-top:20px">❌ Fechar</button>
-</div>
 
-<!-- RELATÓRIOS -->
-<div class="container hidden" id="relatorios">
-  <h2>📊 Relatórios Gerenciais – Histórico Persistente</h2>
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-number" id="totalReqs">0</div>
-      <div>Requisições Totais</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="totalAprov">0</div>
-      <div>Aprovadas</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="valorTotal">R$ 0</div>
-      <div>Valor Total</div>
-    </div>
-  </div>
-  
-  <h3>Últimas 10 Requisições</h3>
-  <table>
-    <thead><tr><th>ID</th><th>Data Criação</th><th>Status</th><th>Valor</th><th>Itens</th></tr></thead>
-    <tbody id="relatoriosLista"></tbody>
-  </table>
-  
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-    <button onclick="exportarExcel()" class="secondary">📥 Exportar para Excel</button>
-    <button onclick="voltar()" class="secondary">❌ Fechar</button>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+    <button onclick="exportarPPT()" class="gray">Exportar PowerPoint</button>
+    <button class="gray" onclick="back()">Fechar</button>
   </div>
 </div>
 
-<!-- PunchOut Popup -->
-<div class="overlay hidden" id="overlay" onclick="fecharPunchout()"></div>
-<div class="popup hidden" id="punchout">
-  <span class="close-popup" onclick="fecharPunchout()">✖</span>
-  <div class="fornecedor">
-    🏢 Fornecedor: <strong>Grupo Igor Soares - Materiais de Escritório</strong>
-  </div>
-  <h3>🛒 Catálogo PunchOut – Selecione Itens</h3>
-  <table>
-    <thead><tr><th>Material</th><th>Descrição</th><th>Preço (R$)</th><th>Estoque</th><th>Qtd</th></tr></thead>
-    <tbody id="punchoutItens"></tbody>
-  </table>
-  <div style="text-align:center;margin-top:20px">
-    <button onclick="enviarSAP()" style="font-size:16px;padding:12px 30px">🚀 Enviar ao SAP (ME51N)</button>
-    <button class="secondary" onclick="fecharPunchout()" style="font-size:16px;padding:12px 30px">❌ Cancelar</button>
+<!-- PUNCHOUT (Overlay + Popup) -->
+<div class="overlay hidden" id="catalog" onclick="closeCatalog()">
+  <div class="popup" onclick="event.stopPropagation()">
+    <span class="close-popup" onclick="closeCatalog()">✖</span>
+
+    <div class="fornecedor">Fornecedor: GRUPO IGOR SOARES</div>
+
+    <h3>Catálogo PunchOut</h3>
+    <table class="table">
+      <thead><tr><th>Item</th><th>Descrição</th><th>Valor</th><th>Qtd</th></tr></thead>
+      <tbody>
+        <tr><td>A4</td><td>Papel A4</td><td>30</td><td><input id="q1" type="number" min="0" value="0" style="width:90px;border:1px solid #ddd;border-radius:10px;padding:8px"/></td></tr>
+        <tr><td>CAN</td><td>Caneta Azul</td><td>5</td><td><input id="q2" type="number" min="0" value="0" style="width:90px;border:1px solid #ddd;border-radius:10px;padding:8px"/></td></tr>
+      </tbody>
+    </table>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+      <button class="green" onclick="sendSAP()">Enviar</button>
+      <button class="gray" onclick="closeCatalog()">Cancelar</button>
+    </div>
   </div>
 </div>
 
 <script>
-// ===== Dados Históricos =====
-let requisicoes = JSON.parse(localStorage.getItem('historicoReqs')) || [];
-let pedidos = JSON.parse(localStorage.getItem('historicoPedidos')) || [];
-let requisicaoAtual = null;
-let pedidoAtual = null;
+  const aprovadores = ["Coordenador","Gerente","CPO"];
+  let rc = null, po = null;
+  let rcStep = 0, poStep = 0;
+  let historico = [];
 
-// ===== Funções de persistência =====
-function salvarHistorico(){
-  localStorage.setItem('historicoReqs',JSON.stringify(requisicoes));
-  localStorage.setItem('historicoPedidos',JSON.stringify(pedidos));
-}
+  const $ = (id) => document.getElementById(id);
 
-// ===== Função Tiles =====
-document.addEventListener('DOMContentLoaded',()=>{
-    atualizarCiclo();
-    carregarRelatorios();
-    document.getElementById('btnExecutar').addEventListener('click',executarTransacao);
-    document.querySelectorAll('.tile').forEach(tile=>{
-        tile.addEventListener('click',()=>{
-            const titulo = tile.querySelector('h3').innerText;
-            if(titulo.includes('ME51N')) abrirME51N();
-            else if(titulo.includes('ME23N')) abrirME23N();
-            else if(titulo.includes('Ciclo')) abrirCatalogo();
-            else if(titulo.includes('Relatórios')) abrirRelatorios();
-        });
-    });
-});
+  function hideAll(){
+    document.querySelectorAll(".container").forEach(d => d.classList.add("hidden"));
+  }
 
-// ===== Transações =====
-function executarTransacao(){
-  const t=document.getElementById('transacao').value.toUpperCase();
-  if(t==="ME51N") abrirME51N();
-  else if(t==="ME23N") abrirME23N();
-  else if(t==="RELATORIO") abrirRelatorios();
-}
-function abrirME51N(){ esconder(); document.getElementById('me51n').classList.remove("hidden"); }
-function abrirME23N(){ esconder(); document.getElementById('me23n').classList.remove("hidden"); }
-function abrirCatalogo(){ esconder(); document.getElementById('catalogo').classList.remove("hidden"); atualizarCiclo(); }
-function abrirRelatorios(){ esconder(); document.getElementById('relatorios').classList.remove("hidden"); carregarRelatorios(); }
-function voltar(){ esconder(); document.getElementById('launchpad').classList.remove("hidden"); }
-function esconder(){['me51n','me23n','catalogo','relatorios'].forEach(id=>document.getElementById(id).classList.add("hidden"))}
+  function back(){
+    hideAll();
+    $("launchpad").classList.remove("hidden");
+  }
 
-// ===== PunchOut =====
-function abrirPunchout(){ 
-    document.getElementById('overlay').classList.remove("hidden"); 
-    document.getElementById('punchout').classList.remove("hidden"); 
-    carregarMateriais();
-}
-function fecharPunchout(){ 
-    document.getElementById('overlay').classList.add("hidden"); 
-    document.getElementById('punchout').classList.add("hidden"); 
-}
+  function openME51N(){ hideAll(); $("me51n").classList.remove("hidden"); }
+  function openME28N(){ hideAll(); $("me28n").classList.remove("hidden"); updateME28N(); }
+  function openME23N(){ hideAll(); $("me23n").classList.remove("hidden"); updateME23N(); }
+  function openCiclo(){ hideAll(); $("ciclo").classList.remove("hidden"); updateCiclo(); }
 
-// ===== Catálogo de Materiais =====
-const materiais = [
-  {MATNR:"1135904",MAKTX:"CHAVE PARTIDA IGNICAO YALE 272029100",PRECO:12619,ESTOQUE:100},
-  {MATNR:"1135905",MAKTX:"POLASEAL PLASTIFICACAO",PRECO:9449,ESTOQUE:50},
-  {MATNR:"1135916",MAKTX:"EXAUSTOR AXIAL E50 M4",PRECO:7905,ESTOQUE:80},
-  {MATNR:"1135933",MAKTX:"ESTRIBO JOHN DEERE RE151799",PRECO:17833,ESTOQUE:30},
-  {MATNR:"1135934",MAKTX:"PLACA JOHN DEERE R214673",PRECO:2392,ESTOQUE:40},
-  {MATNR:"1135956",MAKTX:"JUNTA METAL AISI 316 5POL",PRECO:17493,ESTOQUE:20},
-  {MATNR:"1135962",MAKTX:"CAPACITOR PERMANENTE WEG",PRECO:279,ESTOQUE:60},
-  {MATNR:"1135973",MAKTX:"ARRUELA LISA CATERPILLAR 8T3282",PRECO:5119,ESTOQUE:70},
-  {MATNR:"1135977",MAKTX:"CARRINHO DEITANTE AUTOMOTIVO",PRECO:11959,ESTOQUE:15},
-  {MATNR:"1135995",MAKTX:"BRONZINA MANCAL 2W7211",PRECO:6470,ESTOQUE:25},
-  {MATNR:"1136001",MAKTX:"PISTAO 1077563",PRECO:7691,ESTOQUE:40},
-  {MATNR:"1136010",MAKTX:"COXIM CATERPILLAR 9M1853",PRECO:15223,ESTOQUE:30},
-  {MATNR:"1136017",MAKTX:"ANEL O RING CATERPILLAR 8C3091",PRECO:12456,ESTOQUE:35},
-  {MATNR:"1136032",MAKTX:"ANEL O RING CATERPILLAR 2J6274",PRECO:8212,ESTOQUE:20},
-  {MATNR:"1136035",MAKTX:"CRUZETA CARDAN CATERPILLAR",PRECO:16722,ESTOQUE:50},
-  {MATNR:"1136040",MAKTX:"VOLANTE ACIONAMENTO AUMA 542.0",PRECO:2911,ESTOQUE:60},
-  {MATNR:"1136044",MAKTX:"PAQUIMETRO MITUTOYO 530-114 PAQUIMETRO",PRECO:903,ESTOQUE:15},
-  {MATNR:"1136046",MAKTX:"MACHO 10MM METRICA 3 CANAIS 1.50MM",PRECO:10267,ESTOQUE:10},
-  {MATNR:"1136052",MAKTX:"MODULO AIRBAG RENAULT 8201448824",PRECO:11330,ESTOQUE:25},
-  {MATNR:"1136053",MAKTX:"FERRO SOLDA CH-4010",PRECO:9465,ESTOQUE:10},
-  {MATNR:"1136060",MAKTX:"MACHO 12MM METRICA 3 CANAIS 1.75MM",PRECO:11148,ESTOQUE:15},
-  {MATNR:"1136067",MAKTX:"SENSOR PROXIM 3MM PS4-12GP50-N4-EX",PRECO:9103,ESTOQUE:20},
-  {MATNR:"1136078",MAKTX:"REGUA ALUMINIO",PRECO:15879,ESTOQUE:15},
-  {MATNR:"1136109",MAKTX:"PORCA TRAVA ITT IC32",PRECO:15170,ESTOQUE:25},
-  {MATNR:"1136118",MAKTX:"EIXO REDUTOR OCO KA67/FA67 D",PRECO:3583,ESTOQUE:30},
-  {MATNR:"1136142",MAKTX:"RETENTOR YALE 580046274",PRECO:4110,ESTOQUE:20},
-  {MATNR:"1136146",MAKTX:"SCALP DESCARTAVEL",PRECO:2489,ESTOQUE:15},
-  {MATNR:"1136147",MAKTX:"SCALP DESCARTAVEL",PRECO:5471,ESTOQUE:10}
-];
+  function executarTransacao(){
+    const t = ($("transacao").value || "").trim().toUpperCase();
+    if (t === "ME51N") openME51N();
+    else if (t === "ME28N") openME28N();
+    else if (t === "ME23N") openME23N();
+    else if (t === "CICLO" || t === "CATALOGO") openCiclo();
+  }
 
-function carregarMateriais(){
-    const tbody=document.getElementById('punchoutItens');
-    tbody.innerHTML="";
-    materiais.forEach(m=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${m.MATNR}</td><td>${m.MAKTX}</td><td>${m.PRECO.toLocaleString('pt-BR')}</td><td>${m.ESTOQUE}</td><td><input type="number" min="0" max="${m.ESTOQUE}" value="0"></td>`;
-        tbody.appendChild(tr);
-    });
-}
+  function openCatalog(){ $("catalog").classList.remove("hidden"); }
+  function closeCatalog(){ $("catalog").classList.add("hidden"); }
 
-function enviarSAP(){
-    const tbody=document.getElementById('punchoutItens');
-    const linhas=tbody.querySelectorAll('tr');
-    const itensSelecionados=[];
-    linhas.forEach(tr=>{
-        const qtd=parseInt(tr.querySelector('input').value)||0;
-        if(qtd>0){
-            const mat=tr.children[0].innerText;
-            const desc=tr.children[1].innerText;
-            const preco=parseFloat(tr.children[2].innerText.replace('.','').replace(',',''));
-            itensSelecionados.push({MATNR:mat,MAKTX:desc,QTD:qtd,PRECO:preco});
-        }
-    });
-    if(itensSelecionados.length===0){ alert("Selecione ao menos 1 item."); return; }
+  function sendSAP(){
+    const q1 = Number(($("q1").value || 0));
+    const q2 = Number(($("q2").value || 0));
 
-    requisicaoAtual={numero:Date.now(),status:"Criado",itens:itensSelecionados,dataCriacao:new Date()};
-    requisicoes.push(requisicaoAtual);
-    salvarHistorico();
-    atualizarReq();
-    fecharPunchout();
-    abrirME51N();
-}
+    let total = 0, html = "";
 
-function atualizarReq(){
-    if(!requisicaoAtual) return;
-    document.getElementById('reqNum').innerText=requisicaoAtual.numero;
-    document.getElementById('reqStatus').innerText=requisicaoAtual.status;
-    document.getElementById('reqStatus').className='status '+(requisicaoAtual.status.toLowerCase());
-    const tbody=document.getElementById('itensReq');
-    tbody.innerHTML="";
-    let total=0;
-    requisicaoAtual.itens.forEach(i=>{
-        const tr=document.createElement('tr');
-        const valTotal=i.QTD*i.PRECO;
-        total+=valTotal;
-        tr.innerHTML=`<td>${i.MATNR} - ${i.MAKTX}</td><td>${i.QTD}</td><td>${i.PRECO.toLocaleString('pt-BR')}</td><td>${valTotal.toLocaleString('pt-BR')}</td>`;
-        tbody.appendChild(tr);
-    });
-    document.getElementById('totalReq').innerText=total.toLocaleString('pt-BR');
-}
+    if (q1 > 0){
+      total += q1 * 30;
+      html += `<tr><td>Papel A4</td><td>${q1}</td><td>R$ ${(q1*30)}</td><td>Grupo Igor Soares</td></tr>`;
+    }
+    if (q2 > 0){
+      total += q2 * 5;
+      html += `<tr><td>Caneta Azul</td><td>${q2}</td><td>R$ ${(q2*5)}</td><td>Grupo Igor Soares</td></tr>`;
+    }
 
-// ===== Aprovar Requisição =====
-function aprovarRequisicao(){
-    if(!requisicaoAtual){alert("Sem requisição"); return;}
-    requisicaoAtual.status="Aprovado";
-    requisicaoAtual.dataAprovacao=new Date();
-    salvarHistorico();
-    atualizarReq();
-    // Criar pedido automaticamente
-    pedidoAtual={numero:requisicaoAtual.numero+1,status:"Criado",itens:requisicaoAtual.itens,valorTotal:requisicaoAtual.itens.reduce((acc,i)=>acc+i.PRECO*i.QTD,0),dataCriacao:new Date(),dataAprovacao:null};
-    pedidos.push(pedidoAtual);
-    salvarHistorico();
-    atualizarPedidos();
-    alert("Requisição aprovada e Pedido criado automaticamente!");
-}
+    if (total <= 0){
+      alert("Selecione pelo menos 1 item.");
+      return;
+    }
 
-// ===== Aprovar Pedido =====
-function aprovarPedido(){
-    if(!pedidoAtual){alert("Sem pedido"); return;}
-    pedidoAtual.status="Aprovado";
-    pedidoAtual.dataAprovacao=new Date();
-    salvarHistorico();
-    atualizarPedidos();
-    alert("Pedido aprovado!");
-}
+    rc = { num:"RC"+Date.now().toString().slice(-6), valor: total, status: "EM APROVAÇÃO" };
+    rcStep = 0;
 
-function atualizarPedidos(){
-    if(!pedidoAtual) return;
-    document.getElementById('pedidoNum').innerText=pedidoAtual.numero;
-    document.getElementById('pedidoValor').innerText="R$ "+pedidoAtual.valorTotal.toLocaleString('pt-BR');
-    const statusEl=document.getElementById('pedidoStatus');
-    statusEl.innerText=pedidoAtual.status;
-    statusEl.className='status '+(pedidoAtual.status.toLowerCase());
-    atualizarCiclo();
-}
+    $("rcItems").innerHTML = html;
+    $("rcTotal").innerText = total;
+    $("rcStatus").innerText = "AGUARDANDO " + aprovadores[rcStep];
 
-// ===== Ciclo de Compras =====
-function atualizarCiclo(){
-    const tbody=document.getElementById('cicloTabela');
-    tbody.innerHTML="";
-    requisicoes.forEach(req=>{
-        const ped=pedidos.find(p=>p.numero===req.numero+1);
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${req.numero}</td>
-        <td>${req.dataAprovacao?req.dataAprovacao.toLocaleDateString():'-'}</td>
-        <td>${ped?ped.numero:'-'}</td>
-        <td>${ped&&ped.dataAprovacao?ped.dataAprovacao.toLocaleDateString():'-'}</td>
-        <td>${req.itens.reduce((acc,i)=>acc+i.PRECO*i.QTD,0).toLocaleString('pt-BR')}</td>
-        <td>${ped?Math.ceil((ped.dataAprovacao-req.dataAprovacao)/86400000)+' dias':'-'}</td>
-        <td>${req.status}</td>`;
-        tbody.appendChild(tr);
-    });
-}
+    $("rcNum").innerText = rc.num;
 
-// ===== Relatórios =====
-function carregarRelatorios(){
-    document.getElementById('totalReqs').innerText=requisicoes.length;
-    document.getElementById('totalAprov').innerText=requisicoes.filter(r=>r.status==="Aprovado").length;
-    const valorTotal=requisicoes.reduce((acc,r)=>acc+r.itens.reduce((a,i)=>a+i.PRECO*i.QTD,0),0);
-    document.getElementById('valorTotal').innerText="R$ "+valorTotal.toLocaleString('pt-BR');
+    closeCatalog();
+  }
 
-    const tbody=document.getElementById('relatoriosLista');
-    tbody.innerHTML="";
-    requisicoes.slice(-10).forEach(r=>{
-        tbody.innerHTML+=`<tr><td>${r.numero}</td><td>${r.dataCriacao.toLocaleDateString()}</td><td>${r.status}</td><td>${r.itens.reduce((acc,i)=>acc+i.PRECO*i.QTD,0).toLocaleString('pt-BR')}</td><td>${r.itens.length}</td></tr>`;
-    });
-}
+  function approveRC(){
+    if (!rc){
+      alert("Nenhuma requisição criada ainda (volte na ME51N e envie do PunchOut).");
+      return;
+    }
 
-// ===== Exportar Excel =====
-function exportarExcel(){
-    let csv="Requisição;Data Criação;Status;Valor;Itens\n";
-    requisicoes.forEach(r=>{
-        csv+=`${r.numero};${r.dataCriacao.toLocaleDateString()};${r.status};${r.itens.reduce((acc,i)=>acc+i.PRECO*i.QTD,0)};${r.itens.length}\n`;
-    });
-    const blob=new Blob([csv],{type:'text/csv'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download="historico_requisicoes.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-}
+    if (rcStep < aprovadores.length - 1){
+      rcStep++;
+      $("rcStatus").innerText = "AGUARDANDO " + aprovadores[rcStep];
+    } else {
+      rc.status = "APROVADA";
+      po = { num:"PO"+Date.now().toString().slice(-6), valor: rc.valor, status: "EM APROVAÇÃO" };
+      poStep = 0;
+
+      historico.push({ rc, po });
+
+      rc = null;
+      $("rcStatus").innerText = "APROVADA";
+    }
+
+    updateME28N();
+  }
+
+  function approvePO(){
+    if (!po){
+      alert("Nenhum pedido em aprovação (aprove a RC primeiro).");
+      return;
+    }
+
+    if (poStep < aprovadores.length - 1){
+      poStep++;
+    } else {
+      po.status = "APROVADO";
+      po = null;
+    }
+
+    updateME23N();
+  }
+
+  function updateME28N(){
+    $("rcApStatus").innerText = rc?.status || "—";
+    $("rcPend").innerText = rc ? aprovadores[rcStep] : "—";
+
+    $("rcTimeline").innerHTML = aprovadores
+      .map((a,i)=> `<div class="${rc && i < rcStep ? 'done' : 'wait'}">${a}</div>`)
+      .join("");
+  }
+
+  function updateME23N(){
+    $("poNum").innerText = po?.num || "—";
+    $("poStatus").innerText = po?.status || "—";
+    $("poPend").innerText = po ? aprovadores[poStep] : "—";
+
+    $("poTimeline").innerHTML = aprovadores
+      .map((a,i)=> `<div class="${po && i < poStep ? 'done' : 'wait'}">${a}</div>`)
+      .join("");
+  }
+
+  function updateCiclo(){
+    let total = 0;
+
+    $("cicloTabela").innerHTML = historico.map(h => {
+      total += h.rc.valor;
+      return `<tr>
+        <td>${h.rc.num}</td>
+        <td>${h.po.num}</td>
+        <td>Grupo Igor Soares</td>
+        <td>R$ ${h.rc.valor}</td>
+        <td><span class="status ${h.po.status === 'APROVADO' ? 'aprovadoBadge' : 'pendenteBadge'}">${h.po.status}</span></td>
+        <td>-</td>
+      </tr>`;
+    }).join("");
+
+    $("kReq").innerText = historico.length;
+    $("kPO").innerText = historico.length;
+    $("kValor").innerText = "R$ " + total;
+    $("kTicket").innerText = "R$ " + (historico.length ? (total / historico.length).toFixed(2) : "0");
+  }
+
+  function exportarPPT(){
+    alert("Exportação PowerPoint simulada.\n(Em produção usar pptxgenjs ou backend)");
+  }
 </script>
 </body>
 </html>
-
