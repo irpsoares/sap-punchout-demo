@@ -425,25 +425,7 @@
     <small id="asof">—</small>
   </div>
 
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="label">Valor travado (pendente)</div>
-      <div class="value" id="kTravado">R$ 0</div>
-    </div>
-    <div class="kpi">
-      <div class="label">SLA médio (dias)</div>
-      <div class="value" id="kSlaMedio">0</div>
-    </div>
-    <div class="kpi">
-      <div class="label">SLA pior caso (dias)</div>
-      <div class="value" id="kSlaMax">0</div>
-    </div>
-    <div class="kpi">
-      <div class="label">Economia / evitado (RC aprovadas)</div>
-      <div class="value" id="kEconomia">R$ 0</div>
-    </div>
-  </div>
-
+  <!-- TRANSACOES EM CIMA -->
   <div class="tiles">
     <div class="tile" onclick="openME51N()">
       <h3><span class="icon" aria-hidden="true">R</span>ME51N – Criar Requisição</h3>
@@ -482,6 +464,27 @@
     </div>
   </div>
 
+  <!-- DASH (KPIs) EM BAIXO -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Valor travado (pendente)</div>
+      <div class="value" id="kTravado">R$ 0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">SLA médio (dias)</div>
+      <div class="value" id="kSlaMedio">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">SLA pior caso (dias)</div>
+      <div class="value" id="kSlaMax">0</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Economia / evitado (RC aprovadas)</div>
+      <div class="value" id="kEconomia">R$ 0</div>
+    </div>
+  </div>
+
+  <!-- tabela continua onde está -->
   <div style="margin-top:16px" class="panel">
     <div class="section-title" style="margin:0 0 6px">
       <h2 style="font-size:14px;margin:0;">Pendências por nível (snapshot)</h2>
@@ -498,6 +501,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- ME51N -->
 <div class="container hidden" id="me51n">
