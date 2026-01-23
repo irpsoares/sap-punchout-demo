@@ -22,7 +22,7 @@
     --shadow2: 0 18px 50px rgba(17,24,39,.16);
 
     /* MENOS ARREDONDADO */
-    --radius: 1px;
+    --radius: 3px;
 
     --goodBg:#d1fae5; --goodFg:#065f46;
     --warnBg:#fef3c7; --warnFg:#92400e;
@@ -171,7 +171,7 @@
     pointer-events:none;
   }
 
-  /* Ícone + título com distribuição uniforme */
+/* Ícone + título com distribuição uniforme */
   .tile h3{
     margin:0;
     font-size:14px;
@@ -194,6 +194,18 @@
     color:#334155;
     font-weight:900;
   }
+
+/* COLE AQUI (logo abaixo) */
+.tile h3{
+  position:relative;
+  padding-left:34px;
+}
+.tile h3 .icon{
+  position:absolute;
+  left:-14px;
+  top:50%;
+  transform:translateY(-50%);
+}
 
   .tile .sub{ margin-top:6px; color:var(--muted); font-size:12px; }
   .tile .metric-row{ display:flex; align-items:baseline; gap:10px; margin-top:12px; flex-wrap:wrap; }
